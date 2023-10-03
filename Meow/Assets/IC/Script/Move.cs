@@ -4,25 +4,47 @@ using UnityEngine;
 
 public class Move : MonoBehaviour
 {
-    [SerializeField]
-    private float movespeed;
+    public float movespeed;
+    public float slopeForce; // 경사로를 따라 이동할 때의 힘
+    //private Transform groundCheck;
+    //private LayerMask groundLayer;
 
-    // Start is called before the first frame update
+
+    private Rigidbody2D rb;
+    private bool isOnSlope = false;
+
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if(Input.GetKey(KeyCode.RightArrow))
-        {
-            this.transform.Translate(Vector3.right * Time.deltaTime * movespeed);
-        }
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            this.transform.Translate(Vector3.left * Time.deltaTime * movespeed);
-        }
+        float horizontalInput = Input.GetAxis("Horizontal");
+        transform.Translate(new Vector3(horizontalInput, 0, 0) * movespeed * Time.deltaTime);
+
+        //// 경사로를 따라 이동 처리
+        //CheckGround();
+
+        //if (isOnSlope)
+        //{
+        //    rb.AddForce(Vector2.down * slopeForce);
+        //}
+    }
+
+    private void CheckGround()
+    {
+        //isOnSlope = false;
+        //Collider2D groundCollider = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+
+        //if (groundCollider != null)
+        //{
+        //    float slopeAngle = Vector2.Angle(Vector2.up, groundCollider.transform.up);
+
+        //    if (slopeAngle > 0 && slopeAngle < 45)
+        //    {
+        //        isOnSlope = true;
+        //    }
+        //}
     }
 }
