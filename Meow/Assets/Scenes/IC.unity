@@ -711,7 +711,6 @@ GameObject:
   m_Component:
   - component: {fileID: 761719444}
   - component: {fileID: 761719445}
-  - component: {fileID: 761719446}
   m_Layer: 0
   m_Name: BG3
   m_TagString: Untagged
@@ -749,24 +748,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac94a55b6f51c54ea90b9ce59e1487b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollSpeed: 1
+  scrollSpeed: 0.7
   resetPosition: 19
   startPosition: 0
   CF: {fileID: 1383774875}
---- !u!114 &761719446
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 761719443}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de901b38baba7d45bd989c08203c772, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scrollSpeed: 1
-  loopOffset: 19
 --- !u!1 &900270776
 GameObject:
   m_ObjectHideFlags: 0
@@ -945,7 +930,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1180784800}
   - component: {fileID: 1180784801}
-  - component: {fileID: 1180784802}
   m_Layer: 0
   m_Name: BG2
   m_TagString: Untagged
@@ -987,20 +971,6 @@ MonoBehaviour:
   resetPosition: 19
   startPosition: 0
   CF: {fileID: 1383774875}
---- !u!114 &1180784802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1180784799}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de901b38baba7d45bd989c08203c772, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scrollSpeed: 1
-  loopOffset: 19
 --- !u!1 &1383774871
 GameObject:
   m_ObjectHideFlags: 0
@@ -3778,7 +3748,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1493263417}
   - component: {fileID: 1493263418}
-  - component: {fileID: 1493263419}
   m_Layer: 0
   m_Name: BG1
   m_TagString: Untagged
@@ -3816,24 +3785,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac94a55b6f51c54ea90b9ce59e1487b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollSpeed: 1
+  scrollSpeed: 2
   resetPosition: 19
   startPosition: 0
   CF: {fileID: 1383774875}
---- !u!114 &1493263419
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493263416}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de901b38baba7d45bd989c08203c772, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scrollSpeed: 5
-  loopOffset: 19
 --- !u!1 &1883307847
 GameObject:
   m_ObjectHideFlags: 0
