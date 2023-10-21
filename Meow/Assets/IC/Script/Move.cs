@@ -4,47 +4,102 @@ using UnityEngine;
 
 public class Move : MonoBehaviour
 {
-    public float movespeed;
-    public float slopeForce; // 경사로를 따라 이동할 때의 힘
-    //private Transform groundCheck;
-    //private LayerMask groundLayer;
+    public LayerMask groundMask;
 
+    public float movespeed;
 
     private Rigidbody2D rb;
-    private bool isOnSlope = false;
+    private bool isSlope;
+    private bool isGround;
+    private bool isRight;
+
+    public float shortJumpForce = 2.0f;  // 짧은 점프 힘
+    public float longJumpForce = 3.0f;  // 롱 점프 힘
+    public float jumpPressTime = 0.2f;  // 점프 키를 길게 누르는 시간
+    public float jumpPressStartTime;
+     
+
+    private Vector2 perp;
+    private float angle;
+
+    private SpriteRenderer sr;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {
+        Flip();
+        CheckGround();
+        Jump();
         float horizontalInput = Input.GetAxis("Horizontal");
         transform.Translate(new Vector3(horizontalInput, 0, 0) * movespeed * Time.deltaTime);
 
-        //// 경사로를 따라 이동 처리
-        //CheckGround();
+        Vector2 rayStart = transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1, groundMask);
 
-        //if (isOnSlope)
-        //{
-        //    rb.AddForce(Vector2.down * slopeForce);
-        //}
+        SlopeChk(hit);
+        if (isGround)
+        {
+            this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
+            rb.gravityScale = 0f;
+
+            transform.up = hit.normal;
+        }
+        else
+        {
+            rb.gravityScale = 5f;
+        }
     }
 
+    public void Jump()
+    {
+        if (isGround)
+        {
+            if (Input.GetButtonDown("Jump"))
+            {
+                jumpPressStartTime = Time.time;
+            }
+            if (Input.GetButton("Jump"))
+            {
+                float jumpTime = Time.time - jumpPressStartTime;
+                float jumpForce = jumpTime < jumpPressTime ? longJumpForce : shortJumpForce;
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            }
+        }
+    }
+
+    //지면체크
     private void CheckGround()
     {
-        //isOnSlope = false;
-        //Collider2D groundCollider = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+        isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
+    }
 
-        //if (groundCollider != null)
-        //{
-        //    float slopeAngle = Vector2.Angle(Vector2.up, groundCollider.transform.up);
+    //경사로체크
+    void SlopeChk(RaycastHit2D hit)
+    {
+        perp = Vector2.Perpendicular(hit.normal).normalized;
+        angle = Vector2.Angle(hit.normal, Vector2.up);
 
-        //    if (slopeAngle > 0 && slopeAngle < 45)
-        //    {
-        //        isOnSlope = true;
-        //    }
-        //}
+        if (angle != 0) isSlope = true;
+        else isSlope = false;
+    }
+
+    //좌우 반전
+    void Flip()
+    {
+        if (Input.GetAxisRaw("Horizontal") < 0)
+        {
+            sr.flipX = true;
+            isRight = false;
+        }
+        else if (Input.GetAxisRaw("Horizontal") > 0)
+        {
+            sr.flipX = false;
+            isRight = true;
+        }
     }
 }

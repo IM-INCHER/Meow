@@ -24,7 +24,6 @@ public class PlayerController : MonoBehaviour
 
     int health = 3;
 
-    [SerializeField]
     private bool isSlope;
     private bool isGround;
     private bool isRight;
@@ -33,14 +32,18 @@ public class PlayerController : MonoBehaviour
     private float angle;
 
     private Cat_State state;
-
-    Rigidbody2D rb;
-    Animator anim;
+    
+    private Rigidbody2D rb;
+    private SpriteRenderer sr;
+    private Animator anim;
 
     void Start()
     {
         state = Cat_State.Idle;
+
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
+
         isSlope = false;
         isRight = true;
     }
@@ -53,9 +56,14 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        GroundChk();
         Flip();
         Move();
+        Jump();
+    }
 
+    public void Jump()
+    {
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (isJumping == false)
@@ -74,21 +82,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void Jump()
-    {
-        rb.velocity = Vector2.up * JumpPower;
-    }
-
     private void FixedUpdate()
     {
-        if (isLongJump && rb.velocity.y > 0)
-        {
-            rb.gravityScale = 2.0f;
-        }
-        else
-        {
-            rb.gravityScale = 5.0f;
-        }
+        //if (isLongJump && rb.velocity.y > 0)
+        //{
+        //    rb.gravityScale = 2.0f;
+        //}
+        //else
+        //{
+        //    rb.gravityScale = 5.0f;
+        //}
     }
 
     private void OnCollisionEnter2D(Collision2D col)
@@ -116,31 +119,24 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        //레이캐스팅
+        float horizontalInput = Input.GetAxis("Horizontal");
+        transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+
         Vector2 rayStart = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1, groundMask);
-        RaycastHit2D frontHit = Physics2D.Raycast(frontRay.position, isRight ? Vector2.right : Vector2.left, 1, groundMask);
-        if (hit || frontHit)
+
+        SlopeChk(hit);
+        if (isGround)
         {
-            if (frontHit)
-                SlopeChk(frontHit);
-            else if (hit)
-                SlopeChk(hit);
+            this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
+            rb.gravityScale = 0f;
+
+            transform.up = hit.normal;
         }
         else
         {
-            isSlope = false;
-            isGround = false;
+            rb.gravityScale = 5f;
         }
-
-        float horizontalInput = Input.GetAxis("Horizontal");
-
-        if (isSlope && !isJumping)
-            rb.velocity = perp * moveSpeed * horizontalInput * -1f;
-        else if (!isSlope && !isJumping && isGround)
-            rb.velocity = new Vector2(moveSpeed * horizontalInput, 0);
-        else
-            rb.velocity = new Vector2(moveSpeed * horizontalInput, rb.velocity.y);
 
         if (horizontalInput == 0)
             rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
@@ -152,12 +148,12 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetAxisRaw("Horizontal") < 0)
         {
-            transform.eulerAngles = new Vector3(0, 180, 0);
+            sr.flipX = true;
             isRight = false;
         }
         else if (Input.GetAxisRaw("Horizontal") > 0)
         {
-            transform.eulerAngles = new Vector3(0, 0, 0);
+            sr.flipX = false;
             isRight = true;
         }
     }
