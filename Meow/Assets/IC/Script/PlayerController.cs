@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 enum Cat_State
-{ 
-    Idle,
-    Move_Falt,
-    Move_Slope,
-    Jump
+{
+    Solid,
+    Liquid,
+    Gas
 }
 
 public class PlayerController : MonoBehaviour
@@ -36,13 +35,16 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private Animator anim;
+    private BoxCollider2D collider;
 
     void Start()
     {
-        state = Cat_State.Idle;
+        state = Cat_State.Solid;
 
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
+        collider = GetComponent<BoxCollider2D>();
 
         isSlope = false;
         isRight = true;
@@ -51,7 +53,6 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         jumpCount = 1;
-        anim = GetComponent<Animator>();
     }
 
     void Update()
@@ -60,6 +61,7 @@ public class PlayerController : MonoBehaviour
         Flip();
         Move();
         Jump();
+        ChangeState();
     }
 
     public void Jump()
@@ -128,20 +130,23 @@ public class PlayerController : MonoBehaviour
         SlopeChk(hit);
         if (isGround)
         {
-            this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
-            rb.gravityScale = 0f;
+            if(state == Cat_State.Solid)
+            {
+                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
+                rb.gravityScale = 0f;
 
-            transform.up = hit.normal;
+                transform.up = hit.normal;
+            }
         }
         else
         {
             rb.gravityScale = 5f;
         }
 
-        if (horizontalInput == 0)
-            rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
-        else
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        //if (horizontalInput == 0)
+        //    rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
+        //else
+        //    rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     void Flip()
@@ -170,5 +175,32 @@ public class PlayerController : MonoBehaviour
     void GroundChk()
     {
         isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
+    }
+
+    void ChangeState()
+    {
+        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround)
+        {
+            if(state == Cat_State.Solid)
+            {
+                if (isRight)
+                    anim.SetTrigger("Melt_R");
+                else
+                    anim.SetTrigger("Melt_L");
+
+                collider.isTrigger = false;
+
+                state = Cat_State.Liquid;
+            }
+            else if(state == Cat_State.Liquid)
+            {
+                anim.SetTrigger("Harden");
+
+                collider.isTrigger = true;
+
+                state = Cat_State.Solid;
+            }
+            
+        }
     }
 }
