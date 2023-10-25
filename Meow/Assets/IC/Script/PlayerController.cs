@@ -31,41 +31,69 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxis("Horizontal");
         Vector2 movement = new Vector2(horizontalInput * moveSpeed, 0f);
         transform.Translate(movement * Time.deltaTime);
-        
-        if(Input.GetAxisRaw("Horizontal") < 0)
+
+        if(Input.GetAxisRaw("Horizontal") < 0) //왼쪽을 보고 있을 경우 Idle_L 활성화
         {
-            transform.localScale = new Vector3(-1, 1, 1);
+            anim.SetBool("Idle_L", true);
+            anim.SetBool("Idle_R", false);
+            anim.SetBool("Move_L", true);
         }
-        else if (Input.GetAxisRaw("Horizontal") > 0)
+        else
         {
-            transform.localScale = new Vector3(1, 1, 1);
+            anim.SetBool("Move_L", false); 
         }
+
+        if (Input.GetAxisRaw("Horizontal") > 0) //오른쪽을 보고 있을 경우 Idle_R 활성화
+        { 
+            anim.SetBool("Idle_R", true);
+            anim.SetBool("Idle_L", false);
+            anim.SetBool("Move_R", true);
+        }
+        else
+        { 
+            anim.SetBool("Move_R", false);
+        }
+
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (isJumping == false)
             {
                 isJumping = true;
+                //anim.SetBool("Jump_R", true); 
                 GetComponent<Rigidbody2D>().AddForce(Vector3.up * 450f);
                 isLongJump = true;
-                anim.SetBool("Jumping", true);
             }
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
             isLongJump = false;
-            anim.SetBool("Jumping", false);
+            anim.SetBool("Jump_R", false);
+        }
+
+        if(isLongJump == true)
+        {
+            anim.SetBool("Jump_R", true);
+        }
+        else if(isLongJump == false)
+        {
+            anim.SetBool("Jump_R", false );
+        }
+
+        if ((Input.GetAxisRaw("Horizontal") < 0) && isJumping == true)
+        {
+            anim.SetBool("Jump_L", true);
+        }
+        else if (isJumping == false && isLongJump == false)
+        {
+            anim.SetBool("Jump_L", false);
         }
     }
 
-    public void Jump()
-    {
-        rb.velocity = Vector2.up * JumpPower;
-    }
 
     private void FixedUpdate()
     {
-        if (isLongJump && rb.velocity.y > 0)
+        if (isLongJump && rb.velocity.y > 0) //Long Jump일 경우
         {
             rb.gravityScale = 2.0f;
         }
@@ -79,7 +107,6 @@ public class PlayerController : MonoBehaviour
     {
         if (col.gameObject.tag == "Box")
         {
-            Debug.Log("박스");
             if (health > 0)
             {
                 health -= 1;
