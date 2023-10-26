@@ -74,26 +74,33 @@ public class PlayerController : MonoBehaviour
                 isJumping = true;
                 GetComponent<Rigidbody2D>().AddForce(Vector3.up * 450f);
                 isLongJump = true;
-                anim.SetBool("Jumping", true);
             }
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
             isLongJump = false;
-            anim.SetBool("Jumping", false);
+        }
+
+        if(isJumping == true || isLongJump == true)
+        {
+            anim.SetBool("Jump_R", true);
+        }
+        else if(isJumping == false || isLongJump == false)
+        {
+            anim.SetBool("Jump_R", false) ;
         }
     }
 
     private void FixedUpdate()
     {
-        //if (isLongJump && rb.velocity.y > 0)
-        //{
-        //    rb.gravityScale = 2.0f;
-        //}
-        //else
-        //{
-        //    rb.gravityScale = 5.0f;
-        //}
+        if (isLongJump && rb.velocity.y > 0) //Long Jump 코드
+        {
+            rb.gravityScale = 2.0f;
+        }
+        else
+        {
+            rb.gravityScale = 5.0f;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D col)
@@ -151,16 +158,36 @@ public class PlayerController : MonoBehaviour
 
     void Flip()
     {
-        if (Input.GetAxisRaw("Horizontal") < 0)
+        if (Input.GetAxisRaw("Horizontal") > 0)  //오른쪽 Idle, Move
         {
-            sr.flipX = true;
-            isRight = false;
-        }
-        else if (Input.GetAxisRaw("Horizontal") > 0)
-        {
-            sr.flipX = false;
             isRight = true;
+
+            anim.SetBool("Move_R", true);
+            anim.SetBool("Move_L", false);
+            anim.SetBool("Idle_L", false);
         }
+        else
+        {
+            Debug.Log("오른쪽");
+            anim.SetBool("Idle_R", true);
+            anim.SetBool("Move_R", false);
+
+        }
+
+        //if (Input.GetAxisRaw("Horizontal") < 0) ////왼쪽 Idle, Move
+        //{
+        //    isRight = false;
+
+        //    anim.SetBool("Move_L", true);
+        //    anim.SetBool("Move_R", false);
+        //    anim.SetBool("Idle_R", false);
+
+        //}
+        //else
+        //{
+        //    anim.SetBool("Idle_L", true);
+        //    anim.SetBool("Move_L", false);
+        //}
     }
 
     void SlopeChk(RaycastHit2D hit)
