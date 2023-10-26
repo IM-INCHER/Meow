@@ -20,6 +20,8 @@ public class ScrollBackground : MonoBehaviour
         //if (deltaX > 0) deltaX = 1;
         //else if (deltaX < 0) deltaX = -1;
 
+        Vector3 pos = transform.position;
+
         transform.Translate(Vector2.left * scrollSpeed * deltaX * -1);
 
         // 이미지가 일정 위치로 돌아가면 다시 시작점으로 이동

@@ -20,9 +20,11 @@ public class PlayerController : MonoBehaviour
     public bool isJumping = false;
 
     public LayerMask groundMask;
+    public LayerMask WallMask;
 
     int health = 3;
 
+    [SerializeField]
     private bool isSlope;
     private bool isGround;
     private bool isRight;
@@ -64,6 +66,7 @@ public class PlayerController : MonoBehaviour
         ChangeState();
     }
 
+    //점프
     public void Jump()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -113,70 +116,111 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (col.gameObject.tag == "ground")
+        if (col.gameObject.tag == "Platform")
         {
             isJumping = false;
         }
     }
 
+    //이동
     void Move()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
-        transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
 
         Vector2 rayStart = transform.position;
-        RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1, groundMask);
+        RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
+
+        if (state == Cat_State.Solid)
+        {
+            Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
+            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, WallMask);
+
+            if (fornthit)
+            {
+                Debug.Log(fornthit.collider.name);
+
+                if (fornthit.collider.name == "Wall") { }
+                else transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+            }
+            else
+                transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+
+        }
+        else if (state == Cat_State.Liquid)
+        {
+            Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
+            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1.3f, groundMask);
+
+            SlopeChk(fornthit);
+            Debug.DrawRay(startPos, isRight ? Vector2.right : Vector2.left * 1.3f, Color.red);
+
+            //if (fornthit)
+            //    //Debug.Log(liquidhit.collider.name);
+
+            if (!isSlope)
+            {
+                transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+            }
+        }
 
         SlopeChk(hit);
         if (isGround)
         {
             if(state == Cat_State.Solid)
             {
-                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
-                rb.gravityScale = 0f;
-
-                transform.up = hit.normal;
             }
+            this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
+            rb.gravityScale = 0f;
+
+            if(state == Cat_State.Liquid && !isSlope)
+                rb.velocity = Vector2.zero;
+
+            transform.up = hit.normal;
         }
         else
         {
             rb.gravityScale = 5f;
         }
-
-        //if (horizontalInput == 0)
-        //    rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
-        //else
-        //    rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
+    //좌우확인
     void Flip()
     {
         if (Input.GetAxisRaw("Horizontal") < 0)
         {
-            sr.flipX = true;
+            if(state == Cat_State.Solid)
+                sr.flipX = true;
+
             isRight = false;
         }
         else if (Input.GetAxisRaw("Horizontal") > 0)
         {
-            sr.flipX = false;
+            if (state == Cat_State.Solid)
+                sr.flipX = false;
+
             isRight = true;
         }
     }
 
+    //경사로 체크
     void SlopeChk(RaycastHit2D hit)
     {
         perp = Vector2.Perpendicular(hit.normal).normalized;
         angle = Vector2.Angle(hit.normal, Vector2.up);
 
-        if (angle != 0) isSlope = true;
+        Debug.Log(angle);
+
+        if (angle != 0 && angle < 90) isSlope = true;
         else isSlope = false;
     }
 
+    //땅인지 체크
     void GroundChk()
     {
         isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
     }
 
+    //모드변경
     void ChangeState()
     {
         if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround)
@@ -189,8 +233,12 @@ public class PlayerController : MonoBehaviour
                     anim.SetTrigger("Melt_L");
 
                 collider.isTrigger = false;
+                //rb.isKinematic = false;
 
                 state = Cat_State.Liquid;
+
+                collider.size = new Vector2(collider.size.x, collider.size.y / 2);
+                collider.offset = new Vector2(0, -0.34f);
             }
             else if(state == Cat_State.Liquid)
             {
@@ -198,9 +246,13 @@ public class PlayerController : MonoBehaviour
 
                 collider.isTrigger = true;
 
+                //rb.isKinematic = true;
+
                 state = Cat_State.Solid;
+
+                collider.size = new Vector2(1.33f, 1.5f);
+                collider.offset = new Vector2(0, 0);
             }
-            
         }
     }
 }
