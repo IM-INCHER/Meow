@@ -15,7 +15,6 @@ public class PlayerController : MonoBehaviour
 
     public float moveSpeed = 5f;
     public float JumpPower;
-    public float jumpCount;
     public bool isLongJump = false;
     public bool isJumping = false;
 
@@ -26,8 +25,10 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private bool isSlope;
+    [SerializeField]
     private bool isGround;
-    private bool isRight;
+    private bool isRight = true;
+    private bool isMelting = false;
 
     private Vector2 perp;
     private float angle;
@@ -54,73 +55,54 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
-        jumpCount = 1;
     }
 
     void Update()
     {
         GroundChk();
         Flip();
-        Move();
         Jump();
+        Move();
         ChangeState();
+    }
+
+    private void FixedUpdate()
+    {
     }
 
     //점프
     public void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if(state == Cat_State.Solid)
         {
-            if (isJumping == false)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                //state = Cat_State.Jump;
-                isJumping = true;
-                GetComponent<Rigidbody2D>().AddForce(Vector3.up * 450f);
-                isLongJump = true;
-                anim.SetBool("Jumping", true);
+                if (isJumping == false)
+                {
+                    rb.velocity = Vector2.zero;
+
+                    rb.AddForce(Vector3.up * JumpPower, ForceMode2D.Impulse);
+                    isGround = false;
+                    isJumping = true;
+                    isLongJump = true;
+                    anim.SetTrigger("Jump");
+                }
             }
-        }
-        else if (Input.GetKeyUp(KeyCode.Space))
-        {
-            isLongJump = false;
-            anim.SetBool("Jumping", false);
+            else if (Input.GetKeyUp(KeyCode.Space))
+            {
+                isLongJump = false;
+            }
+
+            if (isJumping && isGround)
+            {
+                isJumping = false;
+                rb.velocity = Vector2.zero;
+                anim.SetTrigger("Idle");
+            }
         }
     }
 
-    private void FixedUpdate()
-    {
-        //if (isLongJump && rb.velocity.y > 0)
-        //{
-        //    rb.gravityScale = 2.0f;
-        //}
-        //else
-        //{
-        //    rb.gravityScale = 5.0f;
-        //}
-    }
-
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        if (col.gameObject.tag == "Box")
-        {
-            Debug.Log("박스");
-            if (health > 0)
-            {
-                health -= 1;
-                HPManager.hp -= 1;
-
-            }
-            else if (HPManager.hp == 0)
-            {
-                Destroy(gameObject);
-            }
-        }
-
-        if (col.gameObject.tag == "Platform")
-        {
-            isJumping = false;
-        }
-    }
+  
 
     //이동
     void Move()
@@ -139,11 +121,20 @@ public class PlayerController : MonoBehaviour
             {
                 Debug.Log(fornthit.collider.name);
 
-                if (fornthit.collider.name == "Wall") { }
-                else transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+                if (fornthit.collider.name == "Wall")
+                {
+                }
+                else
+                {
+                    if(!isMelting)
+                        transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+                }
             }
             else
-                transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+            {
+                if (!isMelting)
+                    transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+            }
 
         }
         else if (state == Cat_State.Liquid)
@@ -154,32 +145,52 @@ public class PlayerController : MonoBehaviour
             SlopeChk(fornthit);
             Debug.DrawRay(startPos, isRight ? Vector2.right : Vector2.left * 1.3f, Color.red);
 
-            //if (fornthit)
-            //    //Debug.Log(liquidhit.collider.name);
-
-            if (!isSlope)
+            if (!isSlope && !isMelting)
             {
-                transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+                transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed / 2 * Time.deltaTime);
             }
         }
 
-        SlopeChk(hit);
+        if (!isJumping)
+        {
+            if (horizontalInput != 0)
+            {
+                anim.SetBool("Move", true);
+            }
+            else
+            {
+                anim.SetBool("Move", false);
+            }
+        }
+
+        if(!isJumping)
+            SlopeChk(hit);
+
         if (isGround)
         {
-            if(state == Cat_State.Solid)
+            if(isJumping == false)
             {
+                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f, transform.position.z);
+                rb.gravityScale = 0f;
+
+                if (state == Cat_State.Liquid && !isSlope)
+                    rb.velocity = Vector2.zero;
             }
-            this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
-            rb.gravityScale = 0f;
 
-            if(state == Cat_State.Liquid && !isSlope)
-                rb.velocity = Vector2.zero;
-
-            transform.up = hit.normal;
+            if(!isJumping)
+                transform.up = hit.normal;
         }
-        else
+
+        if (!isGround)
         {
-            rb.gravityScale = 5f;
+            if (isLongJump) //Long Jump 코드
+            {
+                rb.gravityScale = 3.0f;
+            }
+            else
+            {
+                rb.gravityScale = 6.0f;
+            }
         }
     }
 
@@ -188,17 +199,13 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetAxisRaw("Horizontal") < 0)
         {
-            if(state == Cat_State.Solid)
-                sr.flipX = true;
-
             isRight = false;
+            anim.SetBool("isRight", false);
         }
         else if (Input.GetAxisRaw("Horizontal") > 0)
         {
-            if (state == Cat_State.Solid)
-                sr.flipX = false;
-
             isRight = true;
+            anim.SetBool("isRight", true);
         }
     }
 
@@ -208,7 +215,7 @@ public class PlayerController : MonoBehaviour
         perp = Vector2.Perpendicular(hit.normal).normalized;
         angle = Vector2.Angle(hit.normal, Vector2.up);
 
-        Debug.Log(angle);
+        //Debug.Log(angle);
 
         if (angle != 0 && angle < 90) isSlope = true;
         else isSlope = false;
@@ -217,7 +224,20 @@ public class PlayerController : MonoBehaviour
     //땅인지 체크
     void GroundChk()
     {
-        isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
+        if(rb.velocity.y <= 0)
+        {
+            Vector2 rayStart = transform.position;
+            RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1f, groundMask);
+
+            if (hit)
+                isGround = true;
+            else
+                isGround = false;
+        }
+            
+
+
+        //isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
     }
 
     //모드변경
@@ -225,15 +245,13 @@ public class PlayerController : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround)
         {
+            isMelting = true;
+
             if(state == Cat_State.Solid)
             {
-                if (isRight)
-                    anim.SetTrigger("Melt_R");
-                else
-                    anim.SetTrigger("Melt_L");
+                anim.SetTrigger("Melt");
 
                 collider.isTrigger = false;
-                //rb.isKinematic = false;
 
                 state = Cat_State.Liquid;
 
@@ -246,13 +264,16 @@ public class PlayerController : MonoBehaviour
 
                 collider.isTrigger = true;
 
-                //rb.isKinematic = true;
-
                 state = Cat_State.Solid;
 
                 collider.size = new Vector2(1.33f, 1.5f);
                 collider.offset = new Vector2(0, 0);
             }
         }
+    }
+
+    public void Melting()
+    {
+        isMelting = false;
     }
 }

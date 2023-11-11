@@ -8,6 +8,8 @@ public class ScrollBackground : MonoBehaviour
     public float resetPosition = 10.0f;
     public float startPosition = 10.0f;
 
+    public bool isFreezeY = false;
+
     public CameraFollow CF;
 
     private float cameraMove = 0;
@@ -30,6 +32,8 @@ public class ScrollBackground : MonoBehaviour
             Vector2 newPos = new Vector2(startPosition, transform.localPosition.y);
             transform.localPosition = newPos;
         }
+        pos = transform.position;
+        if (isFreezeY) this.transform.position = new Vector3(pos.x, 0, pos.z);
 
         cameraMove = Camera.main.transform.position.x;
     }
