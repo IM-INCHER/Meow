@@ -29,11 +29,14 @@ public class PlayerController : MonoBehaviour
     private bool isRight = true;
     private bool isMelting = false;
 
+    private bool isCrushing = false;
+
     private Vector2 perp;
     private float angle;
 
     //private Cat_State state;
 
+    [SerializeField]
     private Direction direction;
     
     private Rigidbody2D rb;
@@ -94,6 +97,7 @@ public class PlayerController : MonoBehaviour
                     isJumping = true;
                     isLongJump = true;
                     anim.SetTrigger("Jump");
+                    Debug.Log("점프~");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -118,6 +122,7 @@ public class PlayerController : MonoBehaviour
         Vector2 rayStart = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
 
+        //고양이일때 이동
         if (GameManager.instance.catState == Cat_State.Solid)
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
@@ -145,31 +150,47 @@ public class PlayerController : MonoBehaviour
                     transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
             }
 
-        }
+        } //녹았을때 이동
         else if (GameManager.instance.catState == Cat_State.Liquid)
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
-            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1.3f, groundMask);
+            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1f, groundMask);
 
             SlopeChk(fornthit);
             Debug.DrawRay(startPos, isRight ? Vector2.right : Vector2.left * 1.3f, Color.red);
 
-            if (!isSlope && !isMelting)
+            if (fornthit)
             {
-                transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed / 2 * Time.deltaTime);
-            }
-        }
-
-        if (!isJumping)
-        {
-            if (horizontalInput != 0)
-            {
-                anim.SetBool("Move", true);
+                if (angle >= 90 || angle <= 0)
+                {
+                    //Debug.Log("멈춰라");
+                }
             }
             else
             {
-                anim.SetBool("Move", false);
+                if (!isSlope && !isMelting)
+                {
+                    transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed / 2 * Time.deltaTime);
+                }
             }
+        }
+
+        if (!isJumping && !isMelting)
+        {
+            if (!(GameManager.instance.catState == Cat_State.Liquid && isSlope))
+            {
+                if (horizontalInput != 0)
+                {
+
+                    anim.SetBool("Move", true);
+                }
+                else
+                {
+                    anim.SetBool("Move", false);
+                }
+            }
+            else
+                anim.SetBool("Move", false);
         }
 
         if(!isJumping)
@@ -224,6 +245,8 @@ public class PlayerController : MonoBehaviour
         perp = Vector2.Perpendicular(hit.normal).normalized;
         angle = Vector2.Angle(hit.normal, Vector2.up);
 
+        Debug.Log(perp.x);
+
         if (angle != 0 && angle < 90) isSlope = true;
         else isSlope = false;
     }
@@ -247,7 +270,7 @@ public class PlayerController : MonoBehaviour
     //모드변경
     void ChangeState()
     {
-        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly)
+        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
         {
             isMelting = true;
 
@@ -278,7 +301,7 @@ public class PlayerController : MonoBehaviour
 
     public void PipeMove()
     {
-        Debug.Log("파이프 작동중");
+        //Debug.Log("파이프 작동중");
 
         Vector3 pos = this.transform.position;
 
@@ -296,6 +319,8 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
+                direction = Direction.Center;
+                isCrushing = true;
             }
         }
         else if (direction == Direction.Up)
@@ -320,6 +345,8 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
+                direction = Direction.Center;
+                isCrushing = true;
             }
         }
         else if (direction == Direction.Left)
@@ -331,9 +358,11 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
+                direction = Direction.Center;
+                isCrushing = true;
             }
         }
-        else if (direction == Direction.Center)
+        else if (direction == Direction.Center && isCrushing == false)
         {
             if (Input.GetKeyDown(KeyCode.RightArrow) && (rightHit))
             {
@@ -367,11 +396,15 @@ public class PlayerController : MonoBehaviour
     public void Melting()
     {
         isMelting = false;
+        //Debug.Log("멜팅~!");
     }
 
     public void Center()
     {
         direction = Direction.Center;
+        anim.SetTrigger("Idle");
+        isCrushing = false;
+        //Debug.Log("실행했어");
     }
 
     public void PipeChk()
