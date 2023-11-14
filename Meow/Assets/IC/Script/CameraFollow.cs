@@ -22,16 +22,24 @@ public class CameraFollow : MonoBehaviour
     {
         Vector3 targetPosition = target.position + offset;
         Vector3 smoothedPosition = Vector3.Lerp(transform.position, targetPosition, smoothSpeed);
-        transform.position = new Vector3(
-            Mathf.Clamp(smoothedPosition.x, 0, limitX), // XÁÂÇ¥ Á¦ÇÑ
-            Mathf.Clamp(smoothedPosition.y, 0, limitY), // YÁÂÇ¥ Á¦ÇÑ
-            transform.position.z
-        );
-        ismove = true;
+
+        if(GameManager.instance.catState != Cat_State.Fly)
+        {
+            transform.position = new Vector3(
+           Mathf.Clamp(smoothedPosition.x, 0, limitX), // XÁÂÇ¥ Á¦ÇÑ
+           Mathf.Clamp(smoothedPosition.y, 0, limitY), // YÁÂÇ¥ Á¦ÇÑ
+           transform.position.z
+            );
+        }
+        else
+        {
+            transform.position = new Vector3(smoothedPosition.x, smoothedPosition.y, transform.position.z);
+        }
+        //ismove = true;
 
         if (transform.position.x == 0 || transform.position.x == limitX || transform.position.y == 0 || transform.position.y == limitY)
         {
-            ismove = false;
+            //ismove = false;
         }
     }
 }

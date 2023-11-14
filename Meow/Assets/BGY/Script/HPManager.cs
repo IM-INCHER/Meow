@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class HPManager : MonoBehaviour
 {
-    public static int hp = 3;
-
     public GameObject life1;
     public GameObject life2;
     public GameObject life3;
@@ -20,7 +18,7 @@ public class HPManager : MonoBehaviour
 
     void Update()
     {
-        switch (hp)
+        switch (GameManager.instance.hp)
         {
             case 2:
                 life3.GetComponent<Image>().enabled = false;

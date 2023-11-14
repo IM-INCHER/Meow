@@ -8,9 +8,9 @@ public class Box : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            if (HPManager.hp > 0)
+            if (GameManager.instance.hp > 0)
             {
-                HPManager.hp -= 1;
+                GameManager.instance.hp -= 1;
 
                 Destroy(gameObject);
             }

@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-enum Cat_State
+enum Direction
 {
-    Solid,
-    Liquid,
-    Gas
+    Center,
+    Left,
+    Right,
+    Up,
+    Down
 }
 
 public class PlayerController : MonoBehaviour
@@ -19,9 +21,6 @@ public class PlayerController : MonoBehaviour
     public bool isJumping = false;
 
     public LayerMask groundMask;
-    public LayerMask WallMask;
-
-    int health = 3;
 
     [SerializeField]
     private bool isSlope;
@@ -33,7 +32,9 @@ public class PlayerController : MonoBehaviour
     private Vector2 perp;
     private float angle;
 
-    private Cat_State state;
+    //private Cat_State state;
+
+    private Direction direction;
     
     private Rigidbody2D rb;
     private SpriteRenderer sr;
@@ -42,7 +43,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        state = Cat_State.Solid;
+        //GameManager.instance.catState = Cat_State.Solid;
 
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
@@ -59,11 +60,18 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        GroundChk();
-        Flip();
-        Jump();
-        Move();
-        ChangeState();
+        if (GameManager.instance.catState != Cat_State.Fly)
+        {
+            GroundChk();
+            Flip();
+            Jump();
+            Move();
+            ChangeState();
+        }
+        else if(GameManager.instance.catState == Cat_State.Fly)
+        {
+            PipeMove();
+        }
     }
 
     private void FixedUpdate()
@@ -73,7 +81,7 @@ public class PlayerController : MonoBehaviour
     //점프
     public void Jump()
     {
-        if(state == Cat_State.Solid)
+        if(GameManager.instance.catState == Cat_State.Solid)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -102,8 +110,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-  
-
     //이동
     void Move()
     {
@@ -112,17 +118,20 @@ public class PlayerController : MonoBehaviour
         Vector2 rayStart = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
 
-        if (state == Cat_State.Solid)
+        if (GameManager.instance.catState == Cat_State.Solid)
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
-            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, WallMask);
+            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, groundMask);
 
             if (fornthit)
             {
-                Debug.Log(fornthit.collider.name);
+                //Debug.Log("앞에 뭐가있다");
+                angle = Vector2.Angle(fornthit.normal, Vector2.up);
+                //Debug.Log(angle);
 
-                if (fornthit.collider.name == "Wall")
+                if (angle >= 90 || angle <= 0)
                 {
+                    //Debug.Log("멈춰라");
                 }
                 else
                 {
@@ -137,7 +146,7 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-        else if (state == Cat_State.Liquid)
+        else if (GameManager.instance.catState == Cat_State.Liquid)
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
             RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1.3f, groundMask);
@@ -170,10 +179,10 @@ public class PlayerController : MonoBehaviour
         {
             if(isJumping == false)
             {
-                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f, transform.position.z);
+                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.03f, transform.position.z);
                 rb.gravityScale = 0f;
 
-                if (state == Cat_State.Liquid && !isSlope)
+                if (GameManager.instance.catState == Cat_State.Liquid && !isSlope)
                     rb.velocity = Vector2.zero;
             }
 
@@ -215,8 +224,6 @@ public class PlayerController : MonoBehaviour
         perp = Vector2.Perpendicular(hit.normal).normalized;
         angle = Vector2.Angle(hit.normal, Vector2.up);
 
-        //Debug.Log(angle);
-
         if (angle != 0 && angle < 90) isSlope = true;
         else isSlope = false;
     }
@@ -234,37 +241,34 @@ public class PlayerController : MonoBehaviour
             else
                 isGround = false;
         }
-            
-
-
         //isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
     }
 
     //모드변경
     void ChangeState()
     {
-        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround)
+        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly)
         {
             isMelting = true;
 
-            if(state == Cat_State.Solid)
+            if(GameManager.instance.catState == Cat_State.Solid)
             {
                 anim.SetTrigger("Melt");
 
                 collider.isTrigger = false;
 
-                state = Cat_State.Liquid;
+                GameManager.instance.catState = Cat_State.Liquid;
 
                 collider.size = new Vector2(collider.size.x, collider.size.y / 2);
                 collider.offset = new Vector2(0, -0.34f);
             }
-            else if(state == Cat_State.Liquid)
+            else if(GameManager.instance.catState == Cat_State.Liquid)
             {
                 anim.SetTrigger("Harden");
 
                 collider.isTrigger = true;
 
-                state = Cat_State.Solid;
+                GameManager.instance.catState = Cat_State.Solid;
 
                 collider.size = new Vector2(1.33f, 1.5f);
                 collider.offset = new Vector2(0, 0);
@@ -272,8 +276,121 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void PipeMove()
+    {
+        Debug.Log("파이프 작동중");
+
+        Vector3 pos = this.transform.position;
+
+        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + 1f, pos.z), Vector2.up, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - 1f, pos.z), Vector2.down, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + 1f, pos.y, pos.z), Vector2.right, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - 1f, pos.y, pos.z), Vector2.left, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+
+        if (direction == Direction.Down)
+        {
+            if (downHit)
+            {
+                transform.Translate(Vector2.down * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+            }
+        }
+        else if (direction == Direction.Up)
+        {
+            if (upHit)
+            {
+                transform.Translate(Vector2.up * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+                GameManager.instance.catState = Cat_State.Solid;
+                isRight = true;
+            }
+        }
+        else if (direction == Direction.Right)
+        {
+            if (rightHit)
+            {
+                transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+            }
+        }
+        else if (direction == Direction.Left)
+        {
+            if (leftHit)
+            {
+                transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+            }
+        }
+        else if (direction == Direction.Center)
+        {
+            if (Input.GetKeyDown(KeyCode.RightArrow) && (rightHit))
+            {
+                direction = Direction.Right;
+                anim.SetTrigger("RightFly");
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftArrow) && (leftHit))
+            {
+                direction = Direction.Left;
+                anim.SetTrigger("LeftFly");
+            }
+            else if (Input.GetKeyDown(KeyCode.UpArrow) && (upHit))
+            {
+                direction = Direction.Up;
+                anim.SetTrigger("UpFly");
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) && (downHit))
+            {
+                direction = Direction.Down;
+                anim.SetTrigger("DownFly");
+            }
+
+        }
+
+        Debug.DrawRay(new Vector3(pos.x, pos.y + 1f, pos.z), Vector2.up * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x, pos.y - 1f, pos.z), Vector2.down * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x + 1f, pos.y, pos.z), Vector2.right * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x - 1f, pos.y, pos.z), Vector2.left * 0.1f, Color.red);
+    }
+
     public void Melting()
     {
         isMelting = false;
+    }
+
+    public void Center()
+    {
+        direction = Direction.Center;
+    }
+
+    public void PipeChk()
+    {
+        Vector2 pos = transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 1f, 1 << LayerMask.NameToLayer("Pipe"));
+
+        if(hit)
+        {
+            Debug.Log("파이프 있음");
+            GameManager.instance.catState = Cat_State.Fly;
+            collider.isTrigger = true;
+
+            //파이프 중간으로 조정
+            //this.transform.position = new Vector2(hit.collider.transform.position.x, pos.y);
+            this.transform.Translate(0, -0.5f, 0);
+            anim.SetTrigger("Fly");
+
+            direction = Direction.Down;
+        }
     }
 }
