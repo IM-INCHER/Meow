@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-enum Cat_State
+enum Direction
 {
-    Solid,
-    Liquid,
-    Gas
+    Center,
+    Left,
+    Right,
+    Up,
+    Down
 }
 
 public class PlayerController : MonoBehaviour
@@ -15,22 +17,27 @@ public class PlayerController : MonoBehaviour
 
     public float moveSpeed = 5f;
     public float JumpPower;
-    public float jumpCount;
     public bool isLongJump = false;
     public bool isJumping = false;
 
     public LayerMask groundMask;
 
-    int health = 3;
-
+    [SerializeField]
     private bool isSlope;
+    [SerializeField]
     private bool isGround;
-    private bool isRight;
+    private bool isRight = true;
+    private bool isMelting = false;
+
+    private bool isCrushing = false;
 
     private Vector2 perp;
     private float angle;
 
-    private Cat_State state;
+    //private Cat_State state;
+
+    [SerializeField]
+    private Direction direction;
     
     private Rigidbody2D rb;
     private SpriteRenderer sr;
@@ -39,7 +46,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        state = Cat_State.Solid;
+        //GameManager.instance.catState = Cat_State.Solid;
 
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
@@ -52,182 +59,371 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
-        jumpCount = 1;
     }
 
     void Update()
     {
-        GroundChk();
-        Flip();
-        Move();
-        Jump();
-        ChangeState();
-    }
-
-    public void Jump()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (GameManager.instance.catState != Cat_State.Fly)
         {
-            if (isJumping == false)
-            {
-                //state = Cat_State.Jump;
-                isJumping = true;
-                GetComponent<Rigidbody2D>().AddForce(Vector3.up * 450f);
-                isLongJump = true;
-            }
+            GroundChk();
+            Flip();
+            Jump();
+            Move();
+            ChangeState();
         }
-        else if (Input.GetKeyUp(KeyCode.Space))
+        else if(GameManager.instance.catState == Cat_State.Fly)
         {
-            isLongJump = false;
-        }
-
-        if(isJumping == true || isLongJump == true)
-        {
-            anim.SetBool("Jump_R", true);
-        }
-        else if(isJumping == false || isLongJump == false)
-        {
-            anim.SetBool("Jump_R", false) ;
+            PipeMove();
         }
     }
 
     private void FixedUpdate()
     {
-        if (isLongJump && rb.velocity.y > 0) //Long Jump 코드
-        {
-            rb.gravityScale = 2.0f;
-        }
-        else
-        {
-            rb.gravityScale = 5.0f;
-        }
     }
 
-    private void OnCollisionEnter2D(Collision2D col)
+    //점프
+    public void Jump()
     {
-        if (col.gameObject.tag == "Box")
+        if(GameManager.instance.catState == Cat_State.Solid)
         {
-            Debug.Log("박스");
-            if (health > 0)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                health -= 1;
-                HPManager.hp -= 1;
+                if (isJumping == false)
+                {
+                    rb.velocity = Vector2.zero;
 
+                    rb.AddForce(Vector3.up * JumpPower, ForceMode2D.Impulse);
+                    isGround = false;
+                    isJumping = true;
+                    isLongJump = true;
+                    anim.SetTrigger("Jump");
+                    Debug.Log("점프~");
+                }
             }
-            else if (HPManager.hp == 0)
+            else if (Input.GetKeyUp(KeyCode.Space))
             {
-                Destroy(gameObject);
+                isLongJump = false;
             }
-        }
 
-        if (col.gameObject.tag == "ground")
-        {
-            isJumping = false;
+            if (isJumping && isGround)
+            {
+                isJumping = false;
+                rb.velocity = Vector2.zero;
+                anim.SetTrigger("Idle");
+            }
         }
     }
 
+    //이동
     void Move()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
-        transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
 
         Vector2 rayStart = transform.position;
-        RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1, groundMask);
+        RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
 
-        SlopeChk(hit);
-        if (isGround)
+        //고양이일때 이동
+        if (GameManager.instance.catState == Cat_State.Solid)
         {
-            if(state == Cat_State.Solid)
-            {
-                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.1f, transform.position.z);
-                rb.gravityScale = 0f;
+            Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
+            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, groundMask);
 
-                transform.up = hit.normal;
+            if (fornthit)
+            {
+                //Debug.Log("앞에 뭐가있다");
+                angle = Vector2.Angle(fornthit.normal, Vector2.up);
+                //Debug.Log(angle);
+
+                if (angle >= 90 || angle <= 0)
+                {
+                    //Debug.Log("멈춰라");
+                }
+                else
+                {
+                    if(!isMelting)
+                        transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+                }
+            }
+            else
+            {
+                if (!isMelting)
+                    transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
+            }
+
+        } //녹았을때 이동
+        else if (GameManager.instance.catState == Cat_State.Liquid)
+        {
+            Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
+            RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1f, groundMask);
+
+            SlopeChk(fornthit);
+            Debug.DrawRay(startPos, isRight ? Vector2.right : Vector2.left * 1.3f, Color.red);
+
+            if (fornthit)
+            {
+                if (angle >= 90 || angle <= 0)
+                {
+                    //Debug.Log("멈춰라");
+                }
+            }
+            else
+            {
+                if (!isSlope && !isMelting)
+                {
+                    transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed / 2 * Time.deltaTime);
+                }
             }
         }
-        else
+
+        if (!isJumping && !isMelting)
         {
-            rb.gravityScale = 5f;
+            if (!(GameManager.instance.catState == Cat_State.Liquid && isSlope))
+            {
+                if (horizontalInput != 0)
+                {
+
+                    anim.SetBool("Move", true);
+                }
+                else
+                {
+                    anim.SetBool("Move", false);
+                }
+            }
+            else
+                anim.SetBool("Move", false);
         }
 
-        //if (horizontalInput == 0)
-        //    rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
-        //else
-        //    rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        if(!isJumping)
+            SlopeChk(hit);
+
+        if (isGround)
+        {
+            if(isJumping == false)
+            {
+                this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.03f, transform.position.z);
+                rb.gravityScale = 0f;
+
+                if (GameManager.instance.catState == Cat_State.Liquid && !isSlope)
+                    rb.velocity = Vector2.zero;
+            }
+
+            if(!isJumping)
+                transform.up = hit.normal;
+        }
+
+        if (!isGround)
+        {
+            if (isLongJump) //Long Jump 코드
+            {
+                rb.gravityScale = 3.0f;
+            }
+            else
+            {
+                rb.gravityScale = 6.0f;
+            }
+        }
     }
 
+    //좌우확인
     void Flip()
     {
-        if (Input.GetAxisRaw("Horizontal") > 0)  //오른쪽 Idle, Move
+        if (Input.GetAxisRaw("Horizontal") < 0)
+        {
+            isRight = false;
+            anim.SetBool("isRight", false);
+        }
+        else if (Input.GetAxisRaw("Horizontal") > 0)
         {
             isRight = true;
-
-            anim.SetBool("Move_R", true);
-            anim.SetBool("Move_L", false);
-            anim.SetBool("Idle_L", false);
+            anim.SetBool("isRight", true);
         }
-        else
-        {
-            Debug.Log("오른쪽");
-            anim.SetBool("Idle_R", true);
-            anim.SetBool("Move_R", false);
-
-        }
-
-        //if (Input.GetAxisRaw("Horizontal") < 0) ////왼쪽 Idle, Move
-        //{
-        //    isRight = false;
-
-        //    anim.SetBool("Move_L", true);
-        //    anim.SetBool("Move_R", false);
-        //    anim.SetBool("Idle_R", false);
-
-        //}
-        //else
-        //{
-        //    anim.SetBool("Idle_L", true);
-        //    anim.SetBool("Move_L", false);
-        //}
     }
 
+    //경사로 체크
     void SlopeChk(RaycastHit2D hit)
     {
         perp = Vector2.Perpendicular(hit.normal).normalized;
         angle = Vector2.Angle(hit.normal, Vector2.up);
 
-        if (angle != 0) isSlope = true;
+        Debug.Log(perp.x);
+
+        if (angle != 0 && angle < 90) isSlope = true;
         else isSlope = false;
     }
 
+    //땅인지 체크
     void GroundChk()
     {
-        isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
+        if(rb.velocity.y <= 0)
+        {
+            Vector2 rayStart = transform.position;
+            RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1f, groundMask);
+
+            if (hit)
+                isGround = true;
+            else
+                isGround = false;
+        }
+        //isGround = Physics2D.OverlapCircle(transform.position, 1, groundMask);
     }
 
+    //모드변경
     void ChangeState()
     {
-        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround)
+        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
         {
-            if(state == Cat_State.Solid)
+            isMelting = true;
+
+            if(GameManager.instance.catState == Cat_State.Solid)
             {
-                if (isRight)
-                    anim.SetTrigger("Melt_R");
-                else
-                    anim.SetTrigger("Melt_L");
+                anim.SetTrigger("Melt");
 
                 collider.isTrigger = false;
 
-                state = Cat_State.Liquid;
+                GameManager.instance.catState = Cat_State.Liquid;
+
+                collider.size = new Vector2(collider.size.x, collider.size.y / 2);
+                collider.offset = new Vector2(0, -0.34f);
             }
-            else if(state == Cat_State.Liquid)
+            else if(GameManager.instance.catState == Cat_State.Liquid)
             {
                 anim.SetTrigger("Harden");
 
                 collider.isTrigger = true;
 
-                state = Cat_State.Solid;
+                GameManager.instance.catState = Cat_State.Solid;
+
+                collider.size = new Vector2(1.33f, 1.5f);
+                collider.offset = new Vector2(0, 0);
             }
-            
+        }
+    }
+
+    public void PipeMove()
+    {
+        //Debug.Log("파이프 작동중");
+
+        Vector3 pos = this.transform.position;
+
+        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + 1f, pos.z), Vector2.up, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - 1f, pos.z), Vector2.down, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + 1f, pos.y, pos.z), Vector2.right, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - 1f, pos.y, pos.z), Vector2.left, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+
+        if (direction == Direction.Down)
+        {
+            if (downHit)
+            {
+                transform.Translate(Vector2.down * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+                direction = Direction.Center;
+                isCrushing = true;
+            }
+        }
+        else if (direction == Direction.Up)
+        {
+            if (upHit)
+            {
+                transform.Translate(Vector2.up * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+                GameManager.instance.catState = Cat_State.Solid;
+                isRight = true;
+            }
+        }
+        else if (direction == Direction.Right)
+        {
+            if (rightHit)
+            {
+                transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+                direction = Direction.Center;
+                isCrushing = true;
+            }
+        }
+        else if (direction == Direction.Left)
+        {
+            if (leftHit)
+            {
+                transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+            }
+            else
+            {
+                anim.SetTrigger("Crush");
+                direction = Direction.Center;
+                isCrushing = true;
+            }
+        }
+        else if (direction == Direction.Center && isCrushing == false)
+        {
+            if (Input.GetKeyDown(KeyCode.RightArrow) && (rightHit))
+            {
+                direction = Direction.Right;
+                anim.SetTrigger("RightFly");
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftArrow) && (leftHit))
+            {
+                direction = Direction.Left;
+                anim.SetTrigger("LeftFly");
+            }
+            else if (Input.GetKeyDown(KeyCode.UpArrow) && (upHit))
+            {
+                direction = Direction.Up;
+                anim.SetTrigger("UpFly");
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) && (downHit))
+            {
+                direction = Direction.Down;
+                anim.SetTrigger("DownFly");
+            }
+
+        }
+
+        Debug.DrawRay(new Vector3(pos.x, pos.y + 1f, pos.z), Vector2.up * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x, pos.y - 1f, pos.z), Vector2.down * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x + 1f, pos.y, pos.z), Vector2.right * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x - 1f, pos.y, pos.z), Vector2.left * 0.1f, Color.red);
+    }
+
+    public void Melting()
+    {
+        isMelting = false;
+        //Debug.Log("멜팅~!");
+    }
+
+    public void Center()
+    {
+        direction = Direction.Center;
+        anim.SetTrigger("Idle");
+        isCrushing = false;
+        //Debug.Log("실행했어");
+    }
+
+    public void PipeChk()
+    {
+        Vector2 pos = transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 1f, 1 << LayerMask.NameToLayer("Pipe"));
+
+        if(hit)
+        {
+            Debug.Log("파이프 있음");
+            GameManager.instance.catState = Cat_State.Fly;
+            collider.isTrigger = true;
+
+            //파이프 중간으로 조정
+            //this.transform.position = new Vector2(hit.collider.transform.position.x, pos.y);
+            this.transform.Translate(0, -0.5f, 0);
+            anim.SetTrigger("Fly");
+
+            direction = Direction.Down;
         }
     }
 }
