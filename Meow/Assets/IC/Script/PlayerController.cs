@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour
                     isJumping = true;
                     isLongJump = true;
                     anim.SetTrigger("Jump");
-                    Debug.Log("점프~");
+                    //Debug.Log("점프~");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -177,20 +177,15 @@ public class PlayerController : MonoBehaviour
 
         if (!isJumping && !isMelting)
         {
-            if (!(GameManager.instance.catState == Cat_State.Liquid && isSlope))
+            if (horizontalInput != 0)
             {
-                if (horizontalInput != 0)
-                {
 
-                    anim.SetBool("Move", true);
-                }
-                else
-                {
-                    anim.SetBool("Move", false);
-                }
+                anim.SetBool("Move", true);
             }
             else
+            {
                 anim.SetBool("Move", false);
+            }
         }
 
         if(!isJumping)
@@ -245,7 +240,7 @@ public class PlayerController : MonoBehaviour
         perp = Vector2.Perpendicular(hit.normal).normalized;
         angle = Vector2.Angle(hit.normal, Vector2.up);
 
-        Debug.Log(perp.x);
+        //Debug.Log(perp.x);
 
         if (angle != 0 && angle < 90) isSlope = true;
         else isSlope = false;
@@ -305,10 +300,41 @@ public class PlayerController : MonoBehaviour
 
         Vector3 pos = this.transform.position;
 
-        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + 1f, pos.z), Vector2.up, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - 1f, pos.z), Vector2.down, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + 1f, pos.y, pos.z), Vector2.right, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - 1f, pos.y, pos.z), Vector2.left, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        float dis = 0.8f;
+
+        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + dis, pos.y, pos.z), Vector2.right, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - dis, pos.y, pos.z), Vector2.left, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
+
+        int wayCount = 0;
+
+        if (direction != Direction.Center)
+        {
+            if (upHit)
+            {
+                wayCount++;
+                Debug.Log("위");
+            }
+            if (downHit)
+            {
+                wayCount++;
+                Debug.Log("아래");
+            }
+            if (rightHit)
+            {
+                wayCount++;
+                Debug.Log("오른쪽");
+            }
+            if (leftHit)
+            {
+                wayCount++;
+                Debug.Log("왼쪽");
+            }
+        }
+            
+
+        Debug.Log(wayCount);
 
         if (direction == Direction.Down)
         {
@@ -387,10 +413,34 @@ public class PlayerController : MonoBehaviour
 
         }
 
-        Debug.DrawRay(new Vector3(pos.x, pos.y + 1f, pos.z), Vector2.up * 0.1f, Color.red);
-        Debug.DrawRay(new Vector3(pos.x, pos.y - 1f, pos.z), Vector2.down * 0.1f, Color.red);
-        Debug.DrawRay(new Vector3(pos.x + 1f, pos.y, pos.z), Vector2.right * 0.1f, Color.red);
-        Debug.DrawRay(new Vector3(pos.x - 1f, pos.y, pos.z), Vector2.left * 0.1f, Color.red);
+        //if (wayCount >= 4)
+        //{
+        //    direction = Direction.Center;
+        //    anim.SetTrigger("Idle");
+
+        //    switch (direction)
+        //    {
+        //        case Direction.Up:
+        //            this.transform.Translate(new Vector2(0, dis));
+        //            break;
+        //        case Direction.Down:
+        //            this.transform.Translate(new Vector2(0, -dis));
+        //            break;
+        //        case Direction.Right:
+        //            this.transform.Translate(new Vector2(dis, 0));
+        //            break;
+        //        case Direction.Left:
+        //            this.transform.Translate(new Vector2(-dis, 0));
+        //            break;
+        //    }
+
+               
+        //}
+
+        Debug.DrawRay(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x + dis, pos.y, pos.z), Vector2.right * 0.1f, Color.red);
+        Debug.DrawRay(new Vector3(pos.x - dis, pos.y, pos.z), Vector2.left * 0.1f, Color.red);
     }
 
     public void Melting()
@@ -414,7 +464,7 @@ public class PlayerController : MonoBehaviour
 
         if(hit)
         {
-            Debug.Log("파이프 있음");
+            //Debug.Log("파이프 있음");
             GameManager.instance.catState = Cat_State.Fly;
             collider.isTrigger = true;
 
