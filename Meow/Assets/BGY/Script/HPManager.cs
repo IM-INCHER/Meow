@@ -11,24 +11,31 @@ public class HPManager : MonoBehaviour
 
     void Start()
     {
-        life1.GetComponent<Image>().enabled = true;
-        life2.GetComponent<Image>().enabled = true;
-        life3.GetComponent<Image>().enabled = true;
     }
 
     void Update()
     {
         switch (GameManager.instance.hp)
         {
+            case 3:
+                life1.GetComponent<Image>().enabled = true;
+                life2.GetComponent<Image>().enabled = true;
+                life3.GetComponent<Image>().enabled = true;
+                break;
             case 2:
                 life3.GetComponent<Image>().enabled = false;
+                life2.GetComponent<Image>().enabled = true;
+                life1.GetComponent<Image>().enabled = true;
                 break;
             case 1:
+                life3.GetComponent<Image>().enabled = false;
                 life2.GetComponent<Image>().enabled = false;
+                life1.GetComponent<Image>().enabled = true;
                 break;
             case 0:
+                life3.GetComponent<Image>().enabled = false;
+                life2.GetComponent<Image>().enabled = false;
                 life1.GetComponent<Image>().enabled = false;
-                //game over
                 break;
         }
     }
