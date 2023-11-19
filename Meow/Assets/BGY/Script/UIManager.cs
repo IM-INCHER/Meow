@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -13,13 +14,22 @@ public class UIManager : MonoBehaviour
         //SoundOn.SetActive(true);
         //SoundOff.SetActive(false);
 
+
 }
 
-    public void Option_btn_clicked()
+    private void Update()
     {
-        OptionMenu.SetActive(true);
-
+        if(Input.GetKeyDown(KeyCode.Escape)) 
+        {
+            OptionMenu.SetActive(true);
+        }
     }
+
+    //public void Option_btn_clicked()
+    //{
+    //    OptionMenu.SetActive(true);
+
+    //}
 
     public void Option_BackBtn_clicked()
     {

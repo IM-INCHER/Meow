@@ -43,6 +43,8 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sr;
     private Animator anim;
     private BoxCollider2D collider;
+    
+
 
     void Start()
     {
@@ -98,6 +100,7 @@ public class PlayerController : MonoBehaviour
                     isLongJump = true;
                     anim.SetTrigger("Jump");
                     //Debug.Log("มกวม~");
+                    SoundManager.Instance.PlaySound("Jump");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
