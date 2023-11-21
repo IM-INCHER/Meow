@@ -43,8 +43,6 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sr;
     private Animator anim;
     private BoxCollider2D collider;
-    
-
 
     void Start()
     {

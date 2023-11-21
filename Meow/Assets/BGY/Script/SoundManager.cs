@@ -24,14 +24,14 @@ public class SoundManager : MonoBehaviour
     {
         if(instance == null)
         {
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(this.gameObject);
             instance = this;
 
             sources = GetComponentsInChildren<AudioSource>();
         }
         else
         {
-            DestroyObject(gameObject);
+            DestroyObject(this.gameObject);
         }
     }
 
