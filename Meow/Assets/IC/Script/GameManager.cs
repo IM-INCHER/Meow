@@ -7,7 +7,8 @@ public enum Cat_State
     Solid,
     Liquid,
     Gas,
-    Fly
+    Fly,
+    Die
 }
 
 public class GameManager : MonoBehaviour
@@ -16,6 +17,7 @@ public class GameManager : MonoBehaviour
 
     public int hp;
     public Vector3 spawnpoint;
+    public PlayerController cat;
 
     public Cat_State catState;
 
@@ -23,5 +25,10 @@ public class GameManager : MonoBehaviour
     {
         instance = this;
         catState = Cat_State.Solid;
+    }
+
+    public void Respawn()
+    {
+        cat.Respawn();
     }
 }

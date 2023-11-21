@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
     public bool isLongJump = false;
     public bool isJumping = false;
 
+    public float flyMoveSpeed = 8f;
+
     public LayerMask groundMask;
 
     [SerializeField]
@@ -46,8 +48,6 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        //GameManager.instance.catState = Cat_State.Solid;
-
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
@@ -301,47 +301,25 @@ public class PlayerController : MonoBehaviour
 
         Vector3 pos = this.transform.position;
 
-        float dis = 0.8f;
+        float dis = 0.6f;
 
-        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + dis, pos.y, pos.z), Vector2.right, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - dis, pos.y, pos.z), Vector2.left, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-
-        int wayCount = 0;
-
-        if (direction != Direction.Center)
-        {
-            if (upHit)
-            {
-                wayCount++;
-                Debug.Log("¿ß");
-            }
-            if (downHit)
-            {
-                wayCount++;
-                Debug.Log("æ∆∑°");
-            }
-            if (rightHit)
-            {
-                wayCount++;
-                Debug.Log("ø¿∏•¬ ");
-            }
-            if (leftHit)
-            {
-                wayCount++;
-                Debug.Log("øﬁ¬ ");
-            }
-        }
-            
-
-        Debug.Log(wayCount);
+        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + dis, pos.y, pos.z), Vector2.right, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - dis, pos.y, pos.z), Vector2.left, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
 
         if (direction == Direction.Down)
         {
             if (downHit)
             {
-                transform.Translate(Vector2.down * moveSpeed * Time.deltaTime);
+                if(rightHit && leftHit)
+                {
+                    float x = leftHit.point.x + ((rightHit.point.x - leftHit.point.x) / 2);
+                    transform.position = new Vector2(x, pos.y);
+
+                    Debug.Log(x);
+                }
+                transform.Translate(Vector2.down * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
@@ -354,20 +332,38 @@ public class PlayerController : MonoBehaviour
         {
             if (upHit)
             {
-                transform.Translate(Vector2.up * moveSpeed * Time.deltaTime);
+                if (rightHit && leftHit)
+                {
+                    float x = leftHit.point.x + ((rightHit.point.x - leftHit.point.x) / 2);
+                    transform.position = new Vector2(x, pos.y);
+
+                    Debug.Log(x);
+                }
+                transform.Translate(Vector2.up * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
-                anim.SetTrigger("Crush");
-                GameManager.instance.catState = Cat_State.Solid;
-                isRight = true;
+                RaycastHit2D hit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.3f, groundMask);
+
+                if (hit)
+                {
+                    anim.SetTrigger("Crush");
+                    direction = Direction.Center;
+                    isCrushing = true;
+                }
+                else
+                {
+                    anim.SetTrigger("Out");
+                    GameManager.instance.catState = Cat_State.Solid;
+                    isRight = true;
+                }
             }
         }
         else if (direction == Direction.Right)
         {
             if (rightHit)
             {
-                transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+                transform.Translate(Vector2.right * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
@@ -380,7 +376,7 @@ public class PlayerController : MonoBehaviour
         {
             if (leftHit)
             {
-                transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+                transform.Translate(Vector2.left * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
@@ -411,32 +407,7 @@ public class PlayerController : MonoBehaviour
                 direction = Direction.Down;
                 anim.SetTrigger("DownFly");
             }
-
         }
-
-        //if (wayCount >= 4)
-        //{
-        //    direction = Direction.Center;
-        //    anim.SetTrigger("Idle");
-
-        //    switch (direction)
-        //    {
-        //        case Direction.Up:
-        //            this.transform.Translate(new Vector2(0, dis));
-        //            break;
-        //        case Direction.Down:
-        //            this.transform.Translate(new Vector2(0, -dis));
-        //            break;
-        //        case Direction.Right:
-        //            this.transform.Translate(new Vector2(dis, 0));
-        //            break;
-        //        case Direction.Left:
-        //            this.transform.Translate(new Vector2(-dis, 0));
-        //            break;
-        //    }
-
-               
-        //}
 
         Debug.DrawRay(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up * 0.1f, Color.red);
         Debug.DrawRay(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down * 0.1f, Color.red);
@@ -447,7 +418,6 @@ public class PlayerController : MonoBehaviour
     public void Melting()
     {
         isMelting = false;
-        //Debug.Log("∏·∆√~!");
     }
 
     public void Center()
@@ -476,5 +446,19 @@ public class PlayerController : MonoBehaviour
 
             direction = Direction.Down;
         }
+    }
+
+    public void Respawn()
+    {
+        this.transform.position = GameManager.instance.spawnpoint;
+        GameManager.instance.catState = Cat_State.Solid;
+        anim.Play("Spawn");
+        isRight = true;
+    }
+
+    public void Die()
+    {
+        //this.transform.position = GameManager.instance.spawnpoint;
+
     }
 }

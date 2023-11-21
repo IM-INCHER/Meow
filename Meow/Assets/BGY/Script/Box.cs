@@ -12,7 +12,7 @@ public class Box : MonoBehaviour
             {
                 GameManager.instance.hp -= 1;
 
-                Destroy(gameObject);
+                GameManager.instance.Respawn();
             }
         }
     }
