@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public bool isStart;
+
     public int hp;
     public Vector3 spawnpoint;
     public PlayerController cat;
@@ -24,11 +26,19 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         instance = this;
+        isStart = false;
         catState = Cat_State.Solid;
     }
 
     public void Respawn()
     {
         cat.Respawn();
+    }
+
+    public void GameOver()
+    {
+        cat.Die();
+        catState = Cat_State.Die;
+        isStart = false;
     }
 }

@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public float JumpPower;
     public bool isLongJump = false;
     public bool isJumping = false;
+    public bool isSpawn = false;
 
     public float flyMoveSpeed = 8f;
 
@@ -63,17 +64,34 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.instance.catState != Cat_State.Fly)
+        if (GameManager.instance.isStart)
         {
-            GroundChk();
-            Flip();
-            Jump();
-            Move();
-            ChangeState();
+            if(!isSpawn)
+            {
+                if (GameManager.instance.catState != Cat_State.Fly)
+                {
+                    GroundChk();
+                    Flip();
+                    Jump();
+                    Move();
+                    ChangeState();
+                }
+                else if (GameManager.instance.catState == Cat_State.Fly)
+                {
+                    PipeMove();
+                }
+            }
+            else
+            {
+                GroundChk();
+                if (isGround) isSpawn = false;
+            }
+            
         }
-        else if(GameManager.instance.catState == Cat_State.Fly)
+        else
         {
-            PipeMove();
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0f;
         }
     }
 
@@ -289,7 +307,7 @@ public class PlayerController : MonoBehaviour
 
                 GameManager.instance.catState = Cat_State.Solid;
 
-                collider.size = new Vector2(1.33f, 1.5f);
+                collider.size = new Vector2(1f, 1.5f);
                 collider.offset = new Vector2(0, 0);
             }
         }
@@ -454,11 +472,12 @@ public class PlayerController : MonoBehaviour
         GameManager.instance.catState = Cat_State.Solid;
         anim.Play("Spawn");
         isRight = true;
+        isSpawn = true;
     }
 
     public void Die()
     {
-        //this.transform.position = GameManager.instance.spawnpoint;
-
+        this.transform.position = Vector2.zero;
+        anim.Play("Die");
     }
 }

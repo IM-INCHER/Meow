@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Box : MonoBehaviour
+public class Mushroom : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -12,7 +12,7 @@ public class Box : MonoBehaviour
             {
                 GameManager.instance.hp -= 1;
 
-                if (GameManager.instance.hp <= 0)
+                if(GameManager.instance.hp <= 0)
                 {
                     GameManager.instance.GameOver();
                 }
