@@ -43,8 +43,13 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sr;
     private Animator anim;
     private BoxCollider2D collider;
-    
 
+    //AudioSource audioSource;
+    public AudioClip audioHardWalk;
+    public AudioClip audioJump;
+    public AudioClip audioMeltWalk;
+    public AudioClip audioMelt;
+    public AudioClip audioHard;
 
     void Start()
     {
@@ -54,6 +59,7 @@ public class PlayerController : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider2D>();
+        //audioSource = GetComponent<AudioSource>();
 
         isSlope = false;
         isRight = true;
@@ -99,8 +105,8 @@ public class PlayerController : MonoBehaviour
                     isJumping = true;
                     isLongJump = true;
                     anim.SetTrigger("Jump");
+                    SoundFXManager.instance.PlaySoundFXClip(audioJump, transform, 1f);
                     //Debug.Log("점프~");
-                    SoundManager.Instance.PlaySound("Jump");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -121,7 +127,6 @@ public class PlayerController : MonoBehaviour
     void Move()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
-
         Vector2 rayStart = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
 
@@ -130,7 +135,6 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
             RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, groundMask);
-
             if (fornthit)
             {
                 //Debug.Log("앞에 뭐가있다");
@@ -158,7 +162,6 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
             RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1f, groundMask);
-
             SlopeChk(fornthit);
             Debug.DrawRay(startPos, isRight ? Vector2.right : Vector2.left * 1.3f, Color.red);
 
@@ -182,8 +185,9 @@ public class PlayerController : MonoBehaviour
         {
             if (horizontalInput != 0)
             {
-
+                
                 anim.SetBool("Move", true);
+                //SoundFXManager.instance.PlaySoundFXClip(audioWalk, transform, 1f);
             }
             else
             {
@@ -271,11 +275,11 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
         {
             isMelting = true;
-
-            if(GameManager.instance.catState == Cat_State.Solid)
+            
+            if (GameManager.instance.catState == Cat_State.Solid)
             {
                 anim.SetTrigger("Melt");
-
+                SoundFXManager.instance.PlaySoundFXClip(audioMelt, transform, 1f);
                 collider.isTrigger = false;
 
                 GameManager.instance.catState = Cat_State.Liquid;
@@ -286,7 +290,7 @@ public class PlayerController : MonoBehaviour
             else if(GameManager.instance.catState == Cat_State.Liquid)
             {
                 anim.SetTrigger("Harden");
-
+                SoundFXManager.instance.PlaySoundFXClip(audioHard, transform, 1f);
                 collider.isTrigger = true;
 
                 GameManager.instance.catState = Cat_State.Solid;
@@ -478,5 +482,5 @@ public class PlayerController : MonoBehaviour
 
             direction = Direction.Down;
         }
-    }
+    }  
 }
