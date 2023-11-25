@@ -6,12 +6,8 @@ using UnityEngine.SceneManagement;
 public class SeletScene : MonoBehaviour
 {
     private int seletScene;
-    GameObject soundManager;
     private void Start()
     {
-        soundManager = GameObject.Find("SoundManager");
-        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
-
         seletScene = 0;
         this.transform.position = new Vector2(0.17f, 1.05f);
     }
@@ -21,13 +17,11 @@ public class SeletScene : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
             this.transform.position = new Vector3(4.78f, 1.05f);
-            soundManager.GetComponent<SoundManager>().OnSfxSC();
             seletScene = 1;
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             this.transform.position = new Vector2(0.17f, 1.05f);
-            soundManager.GetComponent<SoundManager>().OnSfxSC();
             seletScene = 0;
         }
 
