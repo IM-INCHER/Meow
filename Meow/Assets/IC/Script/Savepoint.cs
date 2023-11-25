@@ -5,10 +5,13 @@ using UnityEngine;
 public class Savepoint : MonoBehaviour
 {
     private bool isSave;
+    GameObject soundManager;
 
     private void Start()
     {
         isSave = false;
+        soundManager = GameObject.Find("SoundManager");
+        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -21,6 +24,7 @@ public class Savepoint : MonoBehaviour
             {
                 GameManager.instance.spawnpoint = this.transform.position;
                 isSave = true;
+                soundManager.GetComponent<SoundManager>().OnSfxSP();
             }
         }
     }
