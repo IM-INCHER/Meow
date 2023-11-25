@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -22,22 +23,26 @@ public class UIManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Escape)) 
         {
             OptionMenu.SetActive(true);
+            Time.timeScale = 0;
         }
     }
 
     public void Option_BackBtn_clicked()
     {
         OptionMenu.SetActive(false);
+        Time.timeScale = 1;
         //SoundFXManager.instance.PlayUiSoundFXClip(audioClick, 1f);
     }
 
-    public void Option_Sound_on_clicked()
+    public void Restart()
     {
-
+        SceneManager.LoadScene("Stage 1");
+        Time.timeScale = 1;
     }
 
-    public void Option_Sound_off_clicked()
+    public void MainMenu()
     {
-
+        SceneManager.LoadScene("SelectScene");
+        Time.timeScale = 1;
     }
 }

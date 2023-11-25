@@ -10,7 +10,7 @@ public class SoundFXManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = this;
         }
@@ -19,16 +19,6 @@ public class SoundFXManager : MonoBehaviour
     public void PlaySoundFXClip(AudioClip audioClip, Transform spawnTransform, float volume)
     {
         AudioSource audioSource = Instantiate(soundFXobject, spawnTransform.position, Quaternion.identity);
-        audioSource.clip = audioClip;
-        audioSource.volume = volume;
-        audioSource.Play();
-        float clipLength = audioSource.clip.length;
-        Destroy(audioSource.gameObject, clipLength);
-    }
-    
-    public void PlayUiSoundFXClip(AudioClip audioClip, float volume)
-    {
-        AudioSource audioSource = Instantiate(soundFXobject);
         audioSource.clip = audioClip;
         audioSource.volume = volume;
         audioSource.Play();
