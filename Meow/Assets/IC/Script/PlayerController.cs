@@ -84,6 +84,7 @@ public class PlayerController : MonoBehaviour
             else
             {
                 GroundChk();
+                rb.gravityScale = 3f;
                 if (isGround) isSpawn = false;
             }
             
@@ -116,7 +117,6 @@ public class PlayerController : MonoBehaviour
                     isLongJump = true;
                     anim.SetTrigger("Jump");
                     //Debug.Log("มกวม~");
-                    SoundManager.Instance.PlaySound("Jump");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -473,6 +473,8 @@ public class PlayerController : MonoBehaviour
         anim.Play("Spawn");
         isRight = true;
         isSpawn = true;
+        isJumping = false;
+        isLongJump = false;
     }
 
     public void Die()
