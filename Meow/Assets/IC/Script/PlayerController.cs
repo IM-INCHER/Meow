@@ -14,7 +14,6 @@ enum Direction
 public class PlayerController : MonoBehaviour
 {
     public Transform frontRay;
-    GameObject soundManager;
 
     public float moveSpeed = 5f;
     public float JumpPower;
@@ -42,17 +41,11 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private Direction direction;
-
+    
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private Animator anim;
     private BoxCollider2D collider;
-
-    public AudioClip audioJump;
-    public AudioClip audioMelt;
-    public AudioClip audioHard;
-    public AudioClip audioSlip;
-    public AudioClip audioPipe;
 
     void Start()
     {
@@ -61,11 +54,9 @@ public class PlayerController : MonoBehaviour
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider2D>();
 
-        soundManager = GameObject.Find("SoundManager");
-        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
-
         isSlope = false;
         isRight = true;
+        anim.SetBool("isRight", true);
     }
 
     void Awake()
@@ -76,7 +67,7 @@ public class PlayerController : MonoBehaviour
     {
         if (GameManager.instance.isStart)
         {
-            if (!isSpawn)
+            if(!isSpawn)
             {
                 if (GameManager.instance.catState != Cat_State.Fly)
                 {
@@ -94,9 +85,10 @@ public class PlayerController : MonoBehaviour
             else
             {
                 GroundChk();
+                rb.gravityScale = 3f;
                 if (isGround) isSpawn = false;
             }
-
+            
         }
         else
         {
@@ -112,7 +104,7 @@ public class PlayerController : MonoBehaviour
     //점프
     public void Jump()
     {
-        if (GameManager.instance.catState == Cat_State.Solid)
+        if(GameManager.instance.catState == Cat_State.Solid)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -126,7 +118,6 @@ public class PlayerController : MonoBehaviour
                     isLongJump = true;
                     anim.SetTrigger("Jump");
                     //Debug.Log("점프~");
-                    SoundFXManager.instance.PlaySoundFXClip(audioJump, transform, 1f);
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -169,7 +160,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else
                 {
-                    if (!isMelting)
+                    if(!isMelting)
                         transform.Translate(new Vector3(horizontalInput, 0, 0) * moveSpeed * Time.deltaTime);
                 }
             }
@@ -217,12 +208,12 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (!isJumping)
+        if(!isJumping)
             SlopeChk(hit);
 
         if (isGround)
         {
-            if (isJumping == false)
+            if(isJumping == false)
             {
                 this.transform.position = new Vector3(transform.position.x, hit.point.y + 1.33f / 2f + 0.03f, transform.position.z);
                 rb.gravityScale = 0f;
@@ -231,7 +222,7 @@ public class PlayerController : MonoBehaviour
                     rb.velocity = Vector2.zero;
             }
 
-            if (!isJumping)
+            if(!isJumping)
                 transform.up = hit.normal;
         }
 
@@ -278,7 +269,7 @@ public class PlayerController : MonoBehaviour
     //땅인지 체크
     void GroundChk()
     {
-        if (rb.velocity.y <= 0)
+        if(rb.velocity.y <= 0)
         {
             Vector2 rayStart = transform.position;
             RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1f, groundMask);
@@ -294,14 +285,15 @@ public class PlayerController : MonoBehaviour
     //모드변경
     void ChangeState()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
+        if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
         {
             isMelting = true;
+            anim.SetBool("Move", false);
 
             if (GameManager.instance.catState == Cat_State.Solid)
             {
                 anim.SetTrigger("Melt");
-                SoundFXManager.instance.PlaySoundFXClip(audioMelt, transform, 1f);
+
                 collider.isTrigger = false;
 
                 GameManager.instance.catState = Cat_State.Liquid;
@@ -309,10 +301,10 @@ public class PlayerController : MonoBehaviour
                 collider.size = new Vector2(collider.size.x, collider.size.y / 2);
                 collider.offset = new Vector2(0, -0.34f);
             }
-            else if (GameManager.instance.catState == Cat_State.Liquid)
+            else if(GameManager.instance.catState == Cat_State.Liquid)
             {
                 anim.SetTrigger("Harden");
-                SoundFXManager.instance.PlaySoundFXClip(audioHard, transform, 1f);
+
                 collider.isTrigger = true;
 
                 GameManager.instance.catState = Cat_State.Solid;
@@ -340,20 +332,18 @@ public class PlayerController : MonoBehaviour
         {
             if (downHit)
             {
-                if (rightHit && leftHit)
+                if(rightHit && leftHit)
                 {
                     float x = leftHit.point.x + ((rightHit.point.x - leftHit.point.x) / 2);
                     transform.position = new Vector2(x, pos.y);
 
                     Debug.Log(x);
-
                 }
                 transform.Translate(Vector2.down * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
                 anim.SetTrigger("Crush");
-                soundManager.GetComponent<SoundManager>().OnSfxPC();
                 direction = Direction.Center;
                 isCrushing = true;
             }
@@ -378,14 +368,12 @@ public class PlayerController : MonoBehaviour
                 if (hit)
                 {
                     anim.SetTrigger("Crush");
-                    soundManager.GetComponent<SoundManager>().OnSfxPC();
                     direction = Direction.Center;
                     isCrushing = true;
                 }
                 else
                 {
                     anim.SetTrigger("Out");
-                    SoundFXManager.instance.PlaySoundFXClip(audioHard, transform, 1f);
                     GameManager.instance.catState = Cat_State.Solid;
                     isRight = true;
                 }
@@ -400,7 +388,6 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
-                soundManager.GetComponent<SoundManager>().OnSfxPC();
                 direction = Direction.Center;
                 isCrushing = true;
             }
@@ -414,7 +401,6 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
-                soundManager.GetComponent<SoundManager>().OnSfxPC();
                 direction = Direction.Center;
                 isCrushing = true;
             }
@@ -467,7 +453,7 @@ public class PlayerController : MonoBehaviour
         Vector2 pos = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 1f, 1 << LayerMask.NameToLayer("Pipe"));
 
-        if (hit)
+        if(hit)
         {
             //Debug.Log("파이프 있음");
             GameManager.instance.catState = Cat_State.Fly;
@@ -477,7 +463,7 @@ public class PlayerController : MonoBehaviour
             //this.transform.position = new Vector2(hit.collider.transform.position.x, pos.y);
             this.transform.Translate(0, -0.5f, 0);
             anim.SetTrigger("Fly");
-            soundManager.GetComponent<SoundManager>().OnSfxPP();
+
             direction = Direction.Down;
         }
     }
@@ -487,13 +473,19 @@ public class PlayerController : MonoBehaviour
         this.transform.position = GameManager.instance.spawnpoint;
         GameManager.instance.catState = Cat_State.Solid;
         anim.Play("Spawn");
+        anim.SetBool("isRight", true);
         isRight = true;
         isSpawn = true;
+        isJumping = false;
+        isLongJump = false;
+        rb.velocity = Vector2.zero;
+
     }
 
     public void Die()
     {
         this.transform.position = Vector2.zero;
+        this.transform.localScale = new Vector2(2, 2);
         anim.Play("Die");
     }
 }

@@ -22,7 +22,9 @@ public class Savepoint : MonoBehaviour
 
             if (isSave == false)
             {
-                GameManager.instance.spawnpoint = this.transform.position;
+                Vector3 pos = this.transform.position;
+
+                GameManager.instance.spawnpoint = new Vector3(pos.x, pos.y + 1f, 0);
                 isSave = true;
                 soundManager.GetComponent<SoundManager>().OnSfxSP();
             }

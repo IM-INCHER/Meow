@@ -680,7 +680,9 @@ MonoBehaviour:
   - {fileID: 783406708}
   - {fileID: 1749677165}
   - {fileID: 910780335}
-  time: 600
+  time: 2.5
+  timeCount: 2
+  count: 0
 --- !u!4 &1434384831
 Transform:
   m_ObjectHideFlags: 0
