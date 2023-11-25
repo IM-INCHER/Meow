@@ -14,7 +14,6 @@ enum Direction
 public class PlayerController : MonoBehaviour
 {
     public Transform frontRay;
-    GameObject soundManager;
 
     public float moveSpeed = 5f;
     public float JumpPower;
@@ -48,21 +47,12 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
     private BoxCollider2D collider;
 
-    public AudioClip audioJump;
-    public AudioClip audioMelt;
-    public AudioClip audioHard;
-    public AudioClip audioSlip;
-    public AudioClip audioPipe;
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider2D>();
-
-        soundManager = GameObject.Find("SoundManager");
-        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
 
         isSlope = false;
         isRight = true;
@@ -126,7 +116,7 @@ public class PlayerController : MonoBehaviour
                     isLongJump = true;
                     anim.SetTrigger("Jump");
                     //Debug.Log("점프~");
-                    SoundFXManager.instance.PlaySoundFXClip(audioJump, transform, 1f);
+                    SoundManager.Instance.PlaySound("Jump");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -150,13 +140,13 @@ public class PlayerController : MonoBehaviour
 
         Vector2 rayStart = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
-   
+
         //고양이일때 이동
         if (GameManager.instance.catState == Cat_State.Solid)
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
             RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, groundMask);
- 
+
             if (fornthit)
             {
                 //Debug.Log("앞에 뭐가있다");
@@ -301,7 +291,7 @@ public class PlayerController : MonoBehaviour
             if(GameManager.instance.catState == Cat_State.Solid)
             {
                 anim.SetTrigger("Melt");
-                SoundFXManager.instance.PlaySoundFXClip(audioMelt, transform, 1f);
+
                 collider.isTrigger = false;
 
                 GameManager.instance.catState = Cat_State.Liquid;
@@ -312,7 +302,7 @@ public class PlayerController : MonoBehaviour
             else if(GameManager.instance.catState == Cat_State.Liquid)
             {
                 anim.SetTrigger("Harden");
-                SoundFXManager.instance.PlaySoundFXClip(audioHard, transform, 1f);
+
                 collider.isTrigger = true;
 
                 GameManager.instance.catState = Cat_State.Solid;
@@ -346,14 +336,12 @@ public class PlayerController : MonoBehaviour
                     transform.position = new Vector2(x, pos.y);
 
                     Debug.Log(x);
-                    
                 }
                 transform.Translate(Vector2.down * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
                 anim.SetTrigger("Crush");
-                soundManager.GetComponent<SoundManager>().OnSfxPC();
                 direction = Direction.Center;
                 isCrushing = true;
             }
@@ -378,14 +366,12 @@ public class PlayerController : MonoBehaviour
                 if (hit)
                 {
                     anim.SetTrigger("Crush");
-                    soundManager.GetComponent<SoundManager>().OnSfxPC();
                     direction = Direction.Center;
                     isCrushing = true;
                 }
                 else
                 {
                     anim.SetTrigger("Out");
-                    SoundFXManager.instance.PlaySoundFXClip(audioHard, transform, 1f);
                     GameManager.instance.catState = Cat_State.Solid;
                     isRight = true;
                 }
@@ -400,7 +386,6 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
-                soundManager.GetComponent<SoundManager>().OnSfxPC();
                 direction = Direction.Center;
                 isCrushing = true;
             }
@@ -414,7 +399,6 @@ public class PlayerController : MonoBehaviour
             else
             {
                 anim.SetTrigger("Crush");
-                soundManager.GetComponent<SoundManager>().OnSfxPC();
                 direction = Direction.Center;
                 isCrushing = true;
             }
@@ -477,7 +461,7 @@ public class PlayerController : MonoBehaviour
             //this.transform.position = new Vector2(hit.collider.transform.position.x, pos.y);
             this.transform.Translate(0, -0.5f, 0);
             anim.SetTrigger("Fly");
-            soundManager.GetComponent<SoundManager>().OnSfxPP();
+
             direction = Direction.Down;
         }
     }

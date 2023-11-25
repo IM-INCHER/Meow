@@ -25,4 +25,14 @@ public class SoundFXManager : MonoBehaviour
         float clipLength = audioSource.clip.length;
         Destroy(audioSource.gameObject, clipLength);
     }
+    
+    public void PlayUiSoundFXClip(AudioClip audioClip, float volume)
+    {
+        AudioSource audioSource = Instantiate(soundFXobject);
+        audioSource.clip = audioClip;
+        audioSource.volume = volume;
+        audioSource.Play();
+        float clipLength = audioSource.clip.length;
+        Destroy(audioSource.gameObject, clipLength);
+    }
 }

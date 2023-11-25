@@ -7,14 +7,19 @@ public class UIManager : MonoBehaviour
 {
     public GameObject OptionMenu;
 
+    [SerializeField]
+    public AudioClip audioClick;
+
+
     void Start()
     {
         OptionMenu.SetActive(false);
+
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if(Input.GetKeyDown(KeyCode.Escape)) 
         {
             OptionMenu.SetActive(true);
         }
@@ -23,6 +28,7 @@ public class UIManager : MonoBehaviour
     public void Option_BackBtn_clicked()
     {
         OptionMenu.SetActive(false);
+        //SoundFXManager.instance.PlayUiSoundFXClip(audioClick, 1f);
     }
 
     public void Option_Sound_on_clicked()
