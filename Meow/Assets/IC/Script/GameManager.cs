@@ -19,6 +19,8 @@ public class GameManager : MonoBehaviour
 
     public int hp;
     public Vector3 spawnpoint;
+
+    public GameObject GameOverPanel;
     public PlayerController cat;
 
     public Cat_State catState;
@@ -40,5 +42,7 @@ public class GameManager : MonoBehaviour
         cat.Die();
         catState = Cat_State.Die;
         isStart = false;
+
+        GameOverPanel.SetActive(true);
     }
 }

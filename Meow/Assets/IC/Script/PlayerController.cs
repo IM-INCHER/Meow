@@ -56,6 +56,7 @@ public class PlayerController : MonoBehaviour
 
         isSlope = false;
         isRight = true;
+        anim.SetBool("isRight", true);
     }
 
     void Awake()
@@ -287,8 +288,9 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
         {
             isMelting = true;
+            anim.SetBool("Move", false);
 
-            if(GameManager.instance.catState == Cat_State.Solid)
+            if (GameManager.instance.catState == Cat_State.Solid)
             {
                 anim.SetTrigger("Melt");
 
@@ -471,15 +473,19 @@ public class PlayerController : MonoBehaviour
         this.transform.position = GameManager.instance.spawnpoint;
         GameManager.instance.catState = Cat_State.Solid;
         anim.Play("Spawn");
+        anim.SetBool("isRight", true);
         isRight = true;
         isSpawn = true;
         isJumping = false;
         isLongJump = false;
+        rb.velocity = Vector2.zero;
+
     }
 
     public void Die()
     {
         this.transform.position = Vector2.zero;
+        this.transform.localScale = new Vector2(2, 2);
         anim.Play("Die");
     }
 }

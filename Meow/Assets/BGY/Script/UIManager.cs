@@ -22,12 +22,14 @@ public class UIManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Escape)) 
         {
             OptionMenu.SetActive(true);
+            GameManager.instance.isStart = false;
         }
     }
 
     public void Option_BackBtn_clicked()
     {
         OptionMenu.SetActive(false);
+        GameManager.instance.isStart = true;
         //SoundFXManager.instance.PlayUiSoundFXClip(audioClick, 1f);
     }
 
