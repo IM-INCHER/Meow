@@ -19,6 +19,9 @@ public class PlayerController : MonoBehaviour
     public float JumpPower;
     public bool isLongJump = false;
     public bool isJumping = false;
+    public bool isSpawn = false;
+
+    public float flyMoveSpeed = 8f;
 
     public LayerMask groundMask;
 
@@ -44,22 +47,12 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
     private BoxCollider2D collider;
 
-    //AudioSource audioSource;
-    public AudioClip audioHardWalk;
-    public AudioClip audioJump;
-    public AudioClip audioMeltWalk;
-    public AudioClip audioMelt;
-    public AudioClip audioHard;
-
     void Start()
     {
-        //GameManager.instance.catState = Cat_State.Solid;
-
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         collider = GetComponent<BoxCollider2D>();
-        //audioSource = GetComponent<AudioSource>();
 
         isSlope = false;
         isRight = true;
@@ -71,17 +64,34 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.instance.catState != Cat_State.Fly)
+        if (GameManager.instance.isStart)
         {
-            GroundChk();
-            Flip();
-            Jump();
-            Move();
-            ChangeState();
+            if(!isSpawn)
+            {
+                if (GameManager.instance.catState != Cat_State.Fly)
+                {
+                    GroundChk();
+                    Flip();
+                    Jump();
+                    Move();
+                    ChangeState();
+                }
+                else if (GameManager.instance.catState == Cat_State.Fly)
+                {
+                    PipeMove();
+                }
+            }
+            else
+            {
+                GroundChk();
+                if (isGround) isSpawn = false;
+            }
+            
         }
-        else if(GameManager.instance.catState == Cat_State.Fly)
+        else
         {
-            PipeMove();
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0f;
         }
     }
 
@@ -105,8 +115,8 @@ public class PlayerController : MonoBehaviour
                     isJumping = true;
                     isLongJump = true;
                     anim.SetTrigger("Jump");
-                    SoundFXManager.instance.PlaySoundFXClip(audioJump, transform, 1f);
                     //Debug.Log("점프~");
+                    SoundManager.Instance.PlaySound("Jump");
                 }
             }
             else if (Input.GetKeyUp(KeyCode.Space))
@@ -127,6 +137,7 @@ public class PlayerController : MonoBehaviour
     void Move()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
+
         Vector2 rayStart = transform.position;
         RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down, 1.3f, groundMask);
 
@@ -135,6 +146,7 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
             RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 0.7f, groundMask);
+
             if (fornthit)
             {
                 //Debug.Log("앞에 뭐가있다");
@@ -162,6 +174,7 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 startPos = new Vector2(transform.position.x, transform.position.y - 0.3f);
             RaycastHit2D fornthit = Physics2D.Raycast(startPos, isRight ? Vector2.right : Vector2.left, 1f, groundMask);
+
             SlopeChk(fornthit);
             Debug.DrawRay(startPos, isRight ? Vector2.right : Vector2.left * 1.3f, Color.red);
 
@@ -185,9 +198,8 @@ public class PlayerController : MonoBehaviour
         {
             if (horizontalInput != 0)
             {
-                
+
                 anim.SetBool("Move", true);
-                //SoundFXManager.instance.PlaySoundFXClip(audioWalk, transform, 1f);
             }
             else
             {
@@ -275,11 +287,11 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Z) && !isJumping && isGround && GameManager.instance.catState != Cat_State.Fly && !isMelting)
         {
             isMelting = true;
-            
-            if (GameManager.instance.catState == Cat_State.Solid)
+
+            if(GameManager.instance.catState == Cat_State.Solid)
             {
                 anim.SetTrigger("Melt");
-                SoundFXManager.instance.PlaySoundFXClip(audioMelt, transform, 1f);
+
                 collider.isTrigger = false;
 
                 GameManager.instance.catState = Cat_State.Liquid;
@@ -290,12 +302,12 @@ public class PlayerController : MonoBehaviour
             else if(GameManager.instance.catState == Cat_State.Liquid)
             {
                 anim.SetTrigger("Harden");
-                SoundFXManager.instance.PlaySoundFXClip(audioHard, transform, 1f);
+
                 collider.isTrigger = true;
 
                 GameManager.instance.catState = Cat_State.Solid;
 
-                collider.size = new Vector2(1.33f, 1.5f);
+                collider.size = new Vector2(1f, 1.5f);
                 collider.offset = new Vector2(0, 0);
             }
         }
@@ -307,47 +319,25 @@ public class PlayerController : MonoBehaviour
 
         Vector3 pos = this.transform.position;
 
-        float dis = 0.8f;
+        float dis = 0.6f;
 
-        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + dis, pos.y, pos.z), Vector2.right, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - dis, pos.y, pos.z), Vector2.left, 0.1f, 1 << LayerMask.NameToLayer("Pipe"));
-
-        int wayCount = 0;
-
-        if (direction != Direction.Center)
-        {
-            if (upHit)
-            {
-                wayCount++;
-                Debug.Log("위");
-            }
-            if (downHit)
-            {
-                wayCount++;
-                Debug.Log("아래");
-            }
-            if (rightHit)
-            {
-                wayCount++;
-                Debug.Log("오른쪽");
-            }
-            if (leftHit)
-            {
-                wayCount++;
-                Debug.Log("왼쪽");
-            }
-        }
-            
-
-        Debug.Log(wayCount);
+        RaycastHit2D upHit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D downHit = Physics2D.Raycast(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D rightHit = Physics2D.Raycast(new Vector3(pos.x + dis, pos.y, pos.z), Vector2.right, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
+        RaycastHit2D leftHit = Physics2D.Raycast(new Vector3(pos.x - dis, pos.y, pos.z), Vector2.left, 0.3f, 1 << LayerMask.NameToLayer("Pipe"));
 
         if (direction == Direction.Down)
         {
             if (downHit)
             {
-                transform.Translate(Vector2.down * moveSpeed * Time.deltaTime);
+                if(rightHit && leftHit)
+                {
+                    float x = leftHit.point.x + ((rightHit.point.x - leftHit.point.x) / 2);
+                    transform.position = new Vector2(x, pos.y);
+
+                    Debug.Log(x);
+                }
+                transform.Translate(Vector2.down * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
@@ -360,20 +350,38 @@ public class PlayerController : MonoBehaviour
         {
             if (upHit)
             {
-                transform.Translate(Vector2.up * moveSpeed * Time.deltaTime);
+                if (rightHit && leftHit)
+                {
+                    float x = leftHit.point.x + ((rightHit.point.x - leftHit.point.x) / 2);
+                    transform.position = new Vector2(x, pos.y);
+
+                    Debug.Log(x);
+                }
+                transform.Translate(Vector2.up * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
-                anim.SetTrigger("Crush");
-                GameManager.instance.catState = Cat_State.Solid;
-                isRight = true;
+                RaycastHit2D hit = Physics2D.Raycast(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up, 0.3f, groundMask);
+
+                if (hit)
+                {
+                    anim.SetTrigger("Crush");
+                    direction = Direction.Center;
+                    isCrushing = true;
+                }
+                else
+                {
+                    anim.SetTrigger("Out");
+                    GameManager.instance.catState = Cat_State.Solid;
+                    isRight = true;
+                }
             }
         }
         else if (direction == Direction.Right)
         {
             if (rightHit)
             {
-                transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+                transform.Translate(Vector2.right * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
@@ -386,7 +394,7 @@ public class PlayerController : MonoBehaviour
         {
             if (leftHit)
             {
-                transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+                transform.Translate(Vector2.left * flyMoveSpeed * Time.deltaTime);
             }
             else
             {
@@ -417,32 +425,7 @@ public class PlayerController : MonoBehaviour
                 direction = Direction.Down;
                 anim.SetTrigger("DownFly");
             }
-
         }
-
-        //if (wayCount >= 4)
-        //{
-        //    direction = Direction.Center;
-        //    anim.SetTrigger("Idle");
-
-        //    switch (direction)
-        //    {
-        //        case Direction.Up:
-        //            this.transform.Translate(new Vector2(0, dis));
-        //            break;
-        //        case Direction.Down:
-        //            this.transform.Translate(new Vector2(0, -dis));
-        //            break;
-        //        case Direction.Right:
-        //            this.transform.Translate(new Vector2(dis, 0));
-        //            break;
-        //        case Direction.Left:
-        //            this.transform.Translate(new Vector2(-dis, 0));
-        //            break;
-        //    }
-
-               
-        //}
 
         Debug.DrawRay(new Vector3(pos.x, pos.y + dis, pos.z), Vector2.up * 0.1f, Color.red);
         Debug.DrawRay(new Vector3(pos.x, pos.y - dis, pos.z), Vector2.down * 0.1f, Color.red);
@@ -453,7 +436,6 @@ public class PlayerController : MonoBehaviour
     public void Melting()
     {
         isMelting = false;
-        //Debug.Log("멜팅~!");
     }
 
     public void Center()
@@ -482,5 +464,20 @@ public class PlayerController : MonoBehaviour
 
             direction = Direction.Down;
         }
-    }  
+    }
+
+    public void Respawn()
+    {
+        this.transform.position = GameManager.instance.spawnpoint;
+        GameManager.instance.catState = Cat_State.Solid;
+        anim.Play("Spawn");
+        isRight = true;
+        isSpawn = true;
+    }
+
+    public void Die()
+    {
+        this.transform.position = Vector2.zero;
+        anim.Play("Die");
+    }
 }
