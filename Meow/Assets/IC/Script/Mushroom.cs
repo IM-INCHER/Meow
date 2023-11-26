@@ -8,7 +8,7 @@ public class Mushroom : MonoBehaviour
     private void Start()
     {
         soundManager = GameObject.Find("SoundManager");
-        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
+        //soundManager.GetComponent<SoundManager>().SetDamageVolume(1.0f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -19,6 +19,7 @@ public class Mushroom : MonoBehaviour
             {
                 GameManager.instance.hp -= 1;
                 soundManager.GetComponent<SoundManager>().OnSfxDG();
+                //soundManager.GetComponent<SoundManager>().OnSfxDG();
                 if (GameManager.instance.hp <= 0)
                 {
                     GameManager.instance.GameOver();

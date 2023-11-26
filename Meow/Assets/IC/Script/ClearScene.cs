@@ -6,12 +6,12 @@ using UnityEngine.SceneManagement;
 public class ClearScene : MonoBehaviour
 {
     public float time;
-
+    public AudioSource clearsource;
     private float count;
 
     void Start()
     {
-        
+        AudioSource clearsource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -21,6 +21,7 @@ public class ClearScene : MonoBehaviour
         if(count > time)
         {
             SceneManager.LoadScene("SelectScene");
+            clearsource.Play();
         }
     }
 }

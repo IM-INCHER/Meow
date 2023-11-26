@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
         collider = GetComponent<BoxCollider2D>();
 
         soundManager = GameObject.Find("SoundManager");
-        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
+        //soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
 
         isSlope = false;
         isRight = true;

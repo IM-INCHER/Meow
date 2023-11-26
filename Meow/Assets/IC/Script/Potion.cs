@@ -8,7 +8,7 @@ public class Potion : MonoBehaviour
     private void Start()
     {
         soundManager = GameObject.Find("SoundManager");
-        soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
+        //soundManager.GetComponent<SoundManager>().SetSavepointVolume(1.0f);
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

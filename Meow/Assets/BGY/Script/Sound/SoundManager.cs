@@ -9,7 +9,6 @@ public class SoundManager : MonoBehaviour
     public AudioSource btnsource;
     public AudioSource savepointsource;
     public AudioSource itemsource;
-    //public AudioSource walksource;
     public AudioSource damagesource;
     public AudioSource gameoversource;
     public AudioSource pipesource;
