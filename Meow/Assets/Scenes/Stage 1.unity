@@ -1564,6 +1564,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 375.39
@@ -1913,6 +1917,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_Name
       value: Mushroom (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2273,6 +2281,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mushroom (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 105.32
@@ -2418,6 +2430,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_Name
       value: Mushroom (11)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2606,6 +2622,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_Name
       value: Mushroom (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3989,6 +4009,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_Name
       value: Mushroom (10)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -71513,6 +71537,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 369.14
@@ -72157,6 +72185,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mushroom (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 107.95
@@ -72620,6 +72652,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_Name
       value: Mushroom (8)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -83633,6 +83669,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 371.17
@@ -84141,11 +84181,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2311316740213852374, guid: f5d0771257776274cb62023faebb7d44, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 88.7
+      value: 88.68
       objectReference: {fileID: 0}
     - target: {fileID: 2311316740213852374, guid: f5d0771257776274cb62023faebb7d44, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.8
+      value: 7.61
       objectReference: {fileID: 0}
     - target: {fileID: 2311316740213852374, guid: f5d0771257776274cb62023faebb7d44, type: 3}
       propertyPath: m_LocalPosition.z
@@ -84504,6 +84544,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mushroom (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 99.73
@@ -84640,6 +84684,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_Name
       value: Mushroom (9)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -85010,6 +85058,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mushroom (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 96.85
@@ -85075,6 +85127,10 @@ PrefabInstance:
     - target: {fileID: 5763907080169162009, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -85953,6 +86009,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 373.31
@@ -86767,6 +86827,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mushroom (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 94.22
@@ -87068,7 +87132,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6491397988696669600, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_IsTrigger
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6889608330334199319, guid: f1455ad2cc999354897568817d0486be, type: 3}
       propertyPath: m_LocalPosition.x

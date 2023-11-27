@@ -13,7 +13,7 @@ public class Mushroom : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == "Player" && GameManager.instance.catState != Cat_State.Liquid)
         {
             if (GameManager.instance.hp > 0)
             {
