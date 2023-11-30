@@ -27,14 +27,14 @@ public class MainStageSound : MonoBehaviour
 
     void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Stage 1")
+        if (SceneManager.GetActiveScene().name == "SelectScene")
         {
             Destroy(gameObject);
         }
 
-        if(SceneManager.GetActiveScene().name == "SelectScene")
-        {
-            DontDestroyOnLoad(gameObject);
-        }
+        //if(SceneManager.GetActiveScene().name == "SelectScene")
+        //{
+        //    DontDestroyOnLoad(gameObject);
+        //}
     }
 }
